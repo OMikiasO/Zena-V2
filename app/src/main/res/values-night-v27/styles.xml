@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/accentPrimary</item>
+        <item name="colorPrimaryDark">@color/accentPrimary</item>
+        <item name="colorAccent">@color/accentPrimary</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/background</item> <!--///////////-->
+        <item name="android:windowLightNavigationBar">false</item> <!--///////////-->
+        <item name="android:windowLightStatusBar">false</item> <!--///////////-->
+        <item name="android:windowBackground">@color/background</item>
+
+    </style>
+
+
+    <style name="solidButtonStyle" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="cornerRadius">8dp</item>
+        <item name="android:layout_height">40dp</item>
+    </style>
+
+    <style name="strokeButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="cornerRadius">8dp</item>
+        <item name="strokeColor">@color/colorPrimary</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="android:layout_height">40dp</item>
+    </style>
+</resources>

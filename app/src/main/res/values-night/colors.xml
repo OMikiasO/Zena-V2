@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3177F1</color>
+    <color name="colorPrimaryDark">#3177F1</color>
+    <color name="colorAccent">#3177F1</color>
+    <color name="tintBlack">#1E2C30</color>
+    <color name="tintWhite">#E0EBFF</color>
+    <color name="background">#171717</color>
+
+    <color name="blackTranslucent0">#20000000</color>
+    <color name="blackTranslucent1">#5E000000</color>
+
+    <color name="accentPrimary">#4482EF</color>
+    <color name="accentSecondary">#89B4FF</color>
+    <color name="accentTertiary">#2D394A</color>
+    <color name="accentQuaternary">#0C0D10</color>
+
+    <color name="primary">#FFFFFF</color>
+    <color name="secondary">#B8B8B8</color>
+    <color name="tertiary">#757575</color>
+    <color name="quaternary">#424242</color>
+
+    <color name="searchField">#0E0E0E</color>
+</resources>

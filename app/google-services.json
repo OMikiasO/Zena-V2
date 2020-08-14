@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "362843257400",
+    "firebase_url": "https://zena-v2-8cd77.firebaseio.com",
+    "project_id": "zena-v2-8cd77",
+    "storage_bucket": "zena-v2-8cd77.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362843257400:android:229644baa14631571d84cd",
+        "android_client_info": {
+          "package_name": "com.mike.zenaplusplus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362843257400-ghdpbnuud3mbff5p24mido7cegh4c1rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIdHxVuDEde2xTNrr5CqqtsSd3XRw_HXM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362843257400-ghdpbnuud3mbff5p24mido7cegh4c1rs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
