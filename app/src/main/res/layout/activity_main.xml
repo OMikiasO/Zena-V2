@@ -225,19 +225,6 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
-<!--        android:id="@+id/nav_view"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="55dp"-->
-<!--        android:layout_gravity="bottom"-->
-<!--        android:background="@color/colorAccent"-->
-<!--        android:elevation="5dp"-->
-<!--        android:hapticFeedbackEnabled="false"-->
-<!--        android:visibility="gone"-->
-<!--        app:itemHorizontalTranslationEnabled="false"-->
-<!--        app:labelVisibilityMode="selected"-->
-<!--        app:menu="@menu/bottom_nav_menu" />-->
-
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
