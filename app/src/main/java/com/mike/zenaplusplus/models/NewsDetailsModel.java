@@ -1,11 +1,13 @@
 package com.mike.zenaplusplus.models;
 
-public class NewsModel implements Comparable<NewsModel> {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-    public static final int BIG_NEWS_ITEM = 1;
-    public static final int SMALL_NEWS_ITEM = 2;
+public class NewsDetailsModel {
 
-    public NewsModel() {
+    public NewsDetailsModel() {
     }
 
     private String title;
@@ -14,13 +16,13 @@ public class NewsModel implements Comparable<NewsModel> {
     private String id;
     private String category;
     private long postedTime;
-    private int number = -1;
     private boolean showSourceText;
+    private List<String> body = new ArrayList<>();
     private String audio;
+    private Map<String, Integer> topics = new HashMap<>();
     private String link;
-    private int newsType = BIG_NEWS_ITEM;
+
     private double relevanceScore;
-    private Double rankingScore = 0d;
 
     public String getTitle() {
         return title;
@@ -62,14 +64,6 @@ public class NewsModel implements Comparable<NewsModel> {
         this.postedTime = postedTime;
     }
 
-    public int getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
     public boolean isShowSourceText() {
         return showSourceText;
     }
@@ -86,12 +80,28 @@ public class NewsModel implements Comparable<NewsModel> {
         this.category = category;
     }
 
+    public List<String> getBody() {
+        return body;
+    }
+
+    public void setBody(List<String> body) {
+        this.body = body;
+    }
+
     public String getAudio() {
         return audio;
     }
 
     public void setAudio(String audio) {
         this.audio = audio;
+    }
+
+    public Map<String, Integer> getTopics() {
+        return topics;
+    }
+
+    public void setTopics(Map<String, Integer> topics) {
+        this.topics = topics;
     }
 
     public String getLink() {
@@ -108,26 +118,5 @@ public class NewsModel implements Comparable<NewsModel> {
 
     public void setRelevanceScore(double relevanceScore) {
         this.relevanceScore = relevanceScore;
-    }
-
-    public int getNewsType() {
-        return newsType;
-    }
-
-    public void setNewsType(int newsType) {
-        this.newsType = newsType;
-    }
-
-    public Double getRankingScore() {
-        return rankingScore;
-    }
-
-    public void setRankingScore(Double rankingScore) {
-        this.rankingScore = rankingScore;
-    }
-
-    @Override
-    public int compareTo(NewsModel newsModel) {
-        return newsModel.getRankingScore().compareTo(this.getRankingScore());
     }
 }

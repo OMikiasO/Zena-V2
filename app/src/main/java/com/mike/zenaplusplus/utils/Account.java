@@ -76,14 +76,19 @@ public class Account implements Parcelable {
         FirebaseFirestore.getInstance().collection("Users").document(userId).get(Source.CACHE).addOnCompleteListener(taskA -> {
             if (taskA.isSuccessful()) {
                 user.setValue(taskA.getResult().toObject(UserModel.class));
+                NewsRepo.getInstance().fetchNewsForMainFeedFromCache();
+                NewsRepo.getInstance().fetchNewsForMainFeed(false);
+            } else {
+                FirebaseFirestore.getInstance().collection("Users").document(userId).get().addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        user.setValue(task1.getResult().toObject(UserModel.class));
+                        NewsRepo.getInstance().fetchNewsForMainFeedFromCache();
+                        NewsRepo.getInstance().fetchNewsForMainFeed(false);
+                    } else {
+                        Log.e(TAG, task1.getException().getMessage());
+                    }
+                });
             }
-            FirebaseFirestore.getInstance().collection("Users").document(userId).get().addOnCompleteListener(task1 -> {
-                if (task1.isSuccessful()) {
-                    user.setValue(task1.getResult().toObject(UserModel.class));
-                } else {
-                    Log.e(TAG, task1.getException().getMessage());
-                }
-            });
         });
     }
 
@@ -110,11 +115,11 @@ public class Account implements Parcelable {
     }
 
     private void topicAdder() {
-        NewsRepo.getInstance().selectedNewsModel.observeForever(newsModel -> {
+        NewsRepo.getInstance().selectedNewsModel.observeForever(newsDetailsModel -> {
             UserModel userModel = user.getValue();
-            if (newsModel.getBody().isEmpty() || userModel.getUserId() == null) return;
-            for (String topic : newsModel.getTopics().keySet()) {
-                if(newsModel.getTopics().get(topic)<0.8) continue;
+            if (newsDetailsModel.getBody().isEmpty() || userModel.getUserId() == null) return;
+            for (String topic : newsDetailsModel.getTopics().keySet()) {
+                if(newsDetailsModel.getTopics().get(topic)<0.8) continue;
                 if (userModel.getTopicsData().get(topic) == null) {
                     userModel.getTopicsData().put(topic, 1);
                 } else {
@@ -128,10 +133,10 @@ public class Account implements Parcelable {
     }
 
     private void viewNumberUpdater(){
-        NewsRepo.getInstance().selectedNewsModel.observeForever(newsModel -> {
+        NewsRepo.getInstance().selectedNewsModel.observeForever(newsDetailsModel -> {
             UserModel userModel = user.getValue();
-            if (newsModel.getBody().isEmpty() || userModel.getUserId() == null) return;
-            FirebaseFirestore.getInstance().document("News/"+newsModel.getId()).update("views", FieldValue.increment(1));
+            if (newsDetailsModel.getBody().isEmpty() || userModel.getUserId() == null) return;
+            FirebaseFirestore.getInstance().document("News/"+newsDetailsModel.getId()).update("views", FieldValue.increment(1));
         });
     }
 

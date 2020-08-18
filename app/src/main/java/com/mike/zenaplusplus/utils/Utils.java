@@ -19,13 +19,19 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.mike.zenaplusplus.App;
 import com.mike.zenaplusplus.R;
 import com.mike.zenaplusplus.models.FeedElementModel;
+import com.mike.zenaplusplus.models.NewsDetailsModel;
 import com.mike.zenaplusplus.models.NewsModel;
+import com.mike.zenaplusplus.repository.NewsRepo;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
@@ -191,5 +197,53 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    public void buildMainFeed(List<NewsModel> newsModelList, boolean loadMore){
+        Map<String, Double> rankingVariables = App.dynamicVariables.getValue().rankingVariables;
+        for (NewsModel newsModel : newsModelList) {
+            long freshness = (System.currentTimeMillis() - newsModel.getPostedTime()) / 60000;
+            newsModel.setRankingScore(rankingVariables.get("P") * Math.pow(newsModel.getRelevanceScore(), rankingVariables.get("relevanceScoreExponent")) / Math.pow(freshness, rankingVariables.get("freshnessExponent")));
+        }
+        Collections.sort(newsModelList);
+
+        if(!loadMore){
+            for (int i = 0; i < newsModelList.size(); i++) {
+                NewsModel newsModel = newsModelList.get(i);
+                if (i < 5) newsModel.setNumber(i + 1);
+                if (i > 0 && i < 5) newsModel.setNewsType(NewsModel.SMALL_NEWS_ITEM);
+            }
+        }
+        List<Object> mainFeed;
+        if(!loadMore) mainFeed = new ArrayList<>();
+        else mainFeed = new ArrayList<>(Objects.requireNonNull(NewsRepo.getInstance().mainFeedNewsList.getValue()));
+
+        mainFeed.addAll(newsModelList);
+
+        if(!loadMore){
+            FeedElementModel headerElement = new FeedElementModel();
+            headerElement.setItemType(FeedElementModel.HEADER_ITEM);
+            headerElement.setHeaderText("Top 5 News right now");
+            mainFeed.add(0, headerElement);
+            FeedElementModel bigDivider = new FeedElementModel();
+            bigDivider.setItemType(FeedElementModel.BIG_DIVIDER_ITEM);
+            mainFeed.add(6, bigDivider);
+        }
+
+        NewsRepo.getInstance().mainFeedNewsList.setValue(mainFeed);
+    }
+
+    public void recordException(Exception e){
+        FirebaseCrashlytics.getInstance().recordException(e);
+        Log.e(TAG, e.getMessage());
+        try {
+            FirebaseCrashlytics.getInstance().setUserId(Account.getInstance().user.getValue().getUserId());
+        } catch (Exception exception){
+            Log.e(TAG, exception.getMessage());
+        }
+    }
+
+    public void detailsToOverviewModel(NewsDetailsModel newsDetailsModel){
+
     }
 }

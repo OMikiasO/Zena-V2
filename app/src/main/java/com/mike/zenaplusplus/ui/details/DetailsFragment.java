@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
@@ -80,7 +81,8 @@ public class DetailsFragment extends Fragment {
         visitWebsiteImageView.setOnClickListener(v -> Utils.getInstance().openLink(requireContext(), NewsRepo.getInstance().selectedNewsModel.getValue().getLink()));
 
         detailsViewModel.saveImageSourceId.observe(getViewLifecycleOwner(), saveImageView::setImageDrawable);
-        detailsViewModel.saveImageColor.observe(getViewLifecycleOwner(), saveImageView::setColorFilter);
+
+        detailsViewModel.saveImageColor.observe(getViewLifecycleOwner(), colorId -> saveImageView.setColorFilter(ContextCompat.getColor(requireContext(), colorId)));
         detailsViewModel.onSaveClickListener.observe(getViewLifecycleOwner(), saveImageView::setOnClickListener);
     }
 
@@ -94,8 +96,8 @@ public class DetailsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setVerticalScrollBarEnabled(false);
         DetailsAdapter detailsAdapter = new DetailsAdapter(getContext());
-        NewsRepo.getInstance().selectedNewsModel.observe(getViewLifecycleOwner(), newsModel -> {
-            if (!newsModel.getBody().isEmpty()) detailsAdapter.setNews(newsModel);
+        NewsRepo.getInstance().selectedNewsModel.observe(getViewLifecycleOwner(), newsDetailsModel -> {
+            if (!newsDetailsModel.getBody().isEmpty()) detailsAdapter.setNews(newsDetailsModel);
         });
         recyclerView.setAdapter(detailsAdapter);
         if (savedInstanceState != null) {

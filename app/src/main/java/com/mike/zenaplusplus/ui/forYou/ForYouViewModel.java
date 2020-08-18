@@ -6,13 +6,11 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.mike.zenaplusplus.App;
-import com.mike.zenaplusplus.models.FeedElementModel;
 import com.mike.zenaplusplus.models.UserModel;
-import com.mike.zenaplusplus.repository.FeedRepo;
+import com.mike.zenaplusplus.repository.NewsRepo;
 import com.mike.zenaplusplus.utils.Account;
 import com.mike.zenaplusplus.utils.CacheUtils;
 
@@ -28,8 +26,6 @@ public class ForYouViewModel extends AndroidViewModel {
     static final int SHOW_FEED = 2;
     private String feedId = "mainFeed";
 
-    FeedRepo feedRepo;
-
     //LiveData
     private MutableLiveData<List<String>> selectedCategories = new MutableLiveData<>(new ArrayList<>());
     MutableLiveData<Integer> visibleFragment = new MutableLiveData<>(SHOW_NON);
@@ -40,7 +36,6 @@ public class ForYouViewModel extends AndroidViewModel {
 
     public ForYouViewModel(@NonNull Application application) {
         super(application);
-        feedRepo = FeedRepo.getInstance(application);
         synchronizer();
     }
 
@@ -51,7 +46,7 @@ public class ForYouViewModel extends AndroidViewModel {
         Account.getInstance().user.observeForever(userModel -> {
             updateSelectedCategories();
         });
-        feedRepo.loading.observeForever(aBoolean -> {
+        NewsRepo.getInstance().loadingMainFeed.observeForever(aBoolean -> {
             if (aBoolean) loadingProgressBarVisibility.postValue(View.VISIBLE);
             else loadingProgressBarVisibility.postValue(View.GONE);
         });
@@ -86,9 +81,5 @@ public class ForYouViewModel extends AndroidViewModel {
         if(userModel.getSelectedCategories().isEmpty()) boneBtnEnabled.setValue(false);
         else boneBtnEnabled.setValue(true);
 
-    }
-
-    LiveData<List<FeedElementModel>> getMainFeedElements() {
-        return feedRepo.getMainFeedElements();
     }
 }

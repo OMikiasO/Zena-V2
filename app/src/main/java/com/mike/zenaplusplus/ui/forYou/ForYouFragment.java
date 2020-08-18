@@ -17,8 +17,10 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.mike.zenaplusplus.R;
+import com.mike.zenaplusplus.repository.NewsRepo;
 import com.mike.zenaplusplus.utils.Account;
 import com.mike.zenaplusplus.utils.Controller;
+import com.mike.zenaplusplus.utils.Utils;
 
 public class ForYouFragment extends Fragment {
 
@@ -59,23 +61,24 @@ public class ForYouFragment extends Fragment {
 
     private void setUpViews() {
         feedSettingsImageView.setOnClickListener(v -> {
-            if(forYouViewModel.visibleFragment.getValue()==ForYouViewModel.SHOW_FEED){
+            if (forYouViewModel.visibleFragment.getValue() == ForYouViewModel.SHOW_FEED) {
                 categoriesFragment.categoriesAdapter.setSelectedKeys(Account.getInstance().user.getValue().getSelectedCategories());
                 forYouViewModel.visibleFragment.setValue(ForYouViewModel.SHOW_CATEGORIES);
             } else {
-                forYouViewModel.visibleFragment.setValue(ForYouViewModel.SHOW_FEED);
+                if (!Account.getInstance().user.getValue().getSelectedCategories().isEmpty()) {
+                    forYouViewModel.visibleFragment.setValue(ForYouViewModel.SHOW_FEED);
+                } else
+                    Utils.getInstance().makeToast(requireContext(), "Please choose categories before you continue");
             }
         });
 
-        forYouViewModel.loadingProgressBarVisibility.observe(getViewLifecycleOwner(), integer -> {
-            loadingFeedProgressBar.setVisibility(integer);
-        });
+        forYouViewModel.loadingProgressBarVisibility.observe(getViewLifecycleOwner(), loadingFeedProgressBar::setVisibility);
 
-        forYouViewModel.feedRepo.refreshing.observe(getViewLifecycleOwner(), feedRefreshView::setRefreshing);
         feedRefreshView.setOnRefreshListener(() -> {
-            forYouViewModel.feedRepo.mainFeedCF(false, false, true);
+            NewsRepo.getInstance().fetchNewsForMainFeed(false);
+            feedRefreshView.setRefreshing(false);
         });
-        searchImageView.setOnClickListener(v-> Controller.getInstance().searchFragment.setValue(true));
+        searchImageView.setOnClickListener(v -> Controller.getInstance().searchFragment.setValue(true));
     }
 
     private void setUpSwitcher() {
@@ -92,7 +95,6 @@ public class ForYouFragment extends Fragment {
             }
         });
     }
-
 
 
     private void setUpFragments(Bundle savedInstanceState) {

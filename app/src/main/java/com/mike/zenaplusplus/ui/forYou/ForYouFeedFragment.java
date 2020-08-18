@@ -13,7 +13,8 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mike.zenaplusplus.adapter.FeedAdapter;
+import com.mike.zenaplusplus.adapter.NewsAdapter;
+import com.mike.zenaplusplus.repository.NewsRepo;
 import com.paginate.Paginate;
 
 public class ForYouFeedFragment extends Fragment {
@@ -41,12 +42,11 @@ public class ForYouFeedFragment extends Fragment {
         super.onSaveInstanceState(savedInstanceState);
     }
 
-
     private void setUpRecyclerView(Bundle savedInstanceState){
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        FeedAdapter feedAdapter = new FeedAdapter(requireActivity().getApplication(), requireActivity());
-        forYouViewModel.getMainFeedElements().observe(getViewLifecycleOwner(), feedAdapter::setFeedElementModelList);
-        recyclerView.setAdapter(feedAdapter);
+        NewsAdapter newsAdapter = new NewsAdapter(requireActivity().getApplication());
+        NewsRepo.getInstance().mainFeedNewsList.observe(getViewLifecycleOwner(), newsAdapter::setMainFeed);
+        recyclerView.setAdapter(newsAdapter);
         if(savedInstanceState != null){
             recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
         }
@@ -62,13 +62,13 @@ public class ForYouFeedFragment extends Fragment {
         @Override
         public void onLoadMore() {
             Log.e(TAG, "OnLoadMore");
-            forYouViewModel.feedRepo.mainFeedCF(true,false,false);
+            NewsRepo.getInstance().fetchNewsForMainFeed(true);
         }
 
         @Override
         public boolean isLoading() {
             // Indicate whether new page loading is in progress or
-            return forYouViewModel.feedRepo.loading.getValue();
+            return NewsRepo.getInstance().loadingMainFeed.getValue();
         }
 
         @Override

@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mike.zenaplusplus.R;
 import com.mike.zenaplusplus.adapter.CategoriesAdapter;
 import com.mike.zenaplusplus.models.UserModel;
+import com.mike.zenaplusplus.repository.NewsRepo;
 import com.mike.zenaplusplus.utils.Account;
 
 public class CategoriesFragment extends Fragment {
@@ -52,10 +53,10 @@ public class CategoriesFragment extends Fragment {
             UserModel  userModel = Account.getInstance().user.getValue();
             assert userModel != null;
             userModel.setSelectedCategories(categoriesAdapter.getSelectedKeys());
-            Account.getInstance().updateUserFirebaseData().addOnCompleteListener(t->{
-                if(t.isSuccessful()) forYouViewModel.feedRepo.mainFeedCF(false, true,false);
-            });
             Account.getInstance().user.setValue(userModel);
+            Account.getInstance().updateUserFirebaseData().addOnCompleteListener(t->{
+                if(t.isSuccessful()) NewsRepo.getInstance().fetchNewsForMainFeed(false);
+            });
         });
         forYouViewModel.boneBtnEnabled.observe(getViewLifecycleOwner(), doneBtn::setEnabled);
     }

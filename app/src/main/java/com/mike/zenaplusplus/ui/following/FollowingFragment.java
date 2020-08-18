@@ -18,9 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mike.zenaplusplus.App;
 import com.mike.zenaplusplus.R;
-import com.mike.zenaplusplus.adapter.FeedAdapter;
+import com.mike.zenaplusplus.adapter.NewsAdapter;
 import com.mike.zenaplusplus.adapter.SourceAdapter;
-import com.mike.zenaplusplus.repository.FeedRepo;
+import com.mike.zenaplusplus.repository.NewsRepo;
 import com.mike.zenaplusplus.utils.Controller;
 
 import java.util.ArrayList;
@@ -68,10 +68,10 @@ public class FollowingFragment extends Fragment {
 
     private void setUpSavedNewsViews() {
         savedNewsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        FeedAdapter feedAdapter = new FeedAdapter(requireActivity().getApplication(), requireActivity());
-        FeedRepo.getInstance(getActivity().getApplication()).getSavedFeedElements().observe(getViewLifecycleOwner(), feedElementModels -> {
-            Collections.reverse(feedElementModels);
-            if (feedElementModels.isEmpty()) {
+        NewsAdapter newsAdapter = new NewsAdapter(requireActivity().getApplication());
+        NewsRepo.getInstance().savedNewsModels.observe(getViewLifecycleOwner(), newsModelList -> {
+            Collections.reverse(newsModelList);
+            if (newsModelList.isEmpty()) {
                 noSavedNewsImageView.setVisibility(View.VISIBLE);
                 noSavedNewsTextView.setVisibility(View.VISIBLE);
                 savedNewsRecyclerView.setVisibility(View.GONE);
@@ -80,13 +80,30 @@ public class FollowingFragment extends Fragment {
                 noSavedNewsTextView.setVisibility(View.GONE);
                 savedNewsRecyclerView.setVisibility(View.VISIBLE);
             }
-            if (feedElementModels.size() > 2) {
+            if (newsModelList.size() > 2) {
                 seeAllSavedTextView.setVisibility(View.VISIBLE);
-                feedElementModels = feedElementModels.subList(0, 2);
+                newsModelList = newsModelList.subList(0, 2);
             } else seeAllSavedTextView.setVisibility(View.GONE);
-            feedAdapter.setFeedElementModelList(feedElementModels);
+            newsAdapter.setNewsList(newsModelList);
         });
-        savedNewsRecyclerView.setAdapter(feedAdapter);
+//        FeedRepo.getInstance(getActivity().getApplication()).getSavedFeedElements().observe(getViewLifecycleOwner(), feedElementModels -> {
+//            Collections.reverse(feedElementModels);
+//            if (feedElementModels.isEmpty()) {
+//                noSavedNewsImageView.setVisibility(View.VISIBLE);
+//                noSavedNewsTextView.setVisibility(View.VISIBLE);
+//                savedNewsRecyclerView.setVisibility(View.GONE);
+//            } else {
+//                noSavedNewsImageView.setVisibility(View.GONE);
+//                noSavedNewsTextView.setVisibility(View.GONE);
+//                savedNewsRecyclerView.setVisibility(View.VISIBLE);
+//            }
+//            if (feedElementModels.size() > 2) {
+//                seeAllSavedTextView.setVisibility(View.VISIBLE);
+//                feedElementModels = feedElementModels.subList(0, 2);
+//            } else seeAllSavedTextView.setVisibility(View.GONE);
+//            feedAdapter.setFeedElementModelList(feedElementModels);
+//        });
+        savedNewsRecyclerView.setAdapter(newsAdapter);
         seeAllSavedTextView.setOnClickListener(v -> Controller.getInstance().savedNewsFragment.setValue(true));
     }
 

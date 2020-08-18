@@ -16,8 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mike.zenaplusplus.R;
-import com.mike.zenaplusplus.adapter.FeedAdapter;
-import com.mike.zenaplusplus.repository.FeedRepo;
+import com.mike.zenaplusplus.adapter.NewsAdapter;
+import com.mike.zenaplusplus.repository.NewsRepo;
 import com.mike.zenaplusplus.utils.Controller;
 
 public class SavedNewsFragment extends Fragment {
@@ -62,9 +62,9 @@ public class SavedNewsFragment extends Fragment {
 
     private void setUpRecyclerView(Bundle savedInstanceState){
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        FeedAdapter feedAdapter = new FeedAdapter(requireActivity().getApplication(), requireActivity());
-        FeedRepo.getInstance(requireActivity().getApplication()).getSavedFeedElements().observe(getViewLifecycleOwner(), feedAdapter::setFeedElementModelList);
-        recyclerView.setAdapter(feedAdapter);
+        NewsAdapter newsAdapter = new NewsAdapter(requireActivity().getApplication());
+        NewsRepo.getInstance().savedNewsModels.observe(getViewLifecycleOwner(), newsAdapter::setNewsList);
+        recyclerView.setAdapter(newsAdapter);
         if(savedInstanceState != null){
             recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
         }

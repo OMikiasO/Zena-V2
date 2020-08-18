@@ -27,7 +27,7 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.mike.zenaplusplus.models.NewsModel;
+import com.mike.zenaplusplus.models.NewsDetailsModel;
 
 public class PlayerUtils {
     private static final String TAG = "PlayerUtils";
@@ -43,12 +43,12 @@ public class PlayerUtils {
     private String currentUrl;
     private int skipper = 0;
     public MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(false);
-    public MutableLiveData<NewsModel> currentlyPlayingNewsModel = new MutableLiveData<>();
+    public MutableLiveData<NewsDetailsModel> currentlyPlayingNewsModel = new MutableLiveData<>();
     public MutableLiveData<Integer> position = new MutableLiveData<>(0);
 
-    public void initMediaPlayer(Context context, NewsModel newsModel) {
-        currentlyPlayingNewsModel.setValue(newsModel);
-        if (newsModel.getAudio().equals(currentUrl)) {
+    public void initMediaPlayer(Context context, NewsDetailsModel newsDetailsModel) {
+        currentlyPlayingNewsModel.setValue(newsDetailsModel);
+        if (newsDetailsModel.getAudio().equals(currentUrl)) {
             if (player != null) return;
         } else {
             if (player != null) player.release();
@@ -65,7 +65,7 @@ public class PlayerUtils {
         dataSourceFactory = new DefaultDataSourceFactory(context.getApplicationContext(), "ExoplayerDemo");
         extractorsFactory = new DefaultExtractorsFactory();
         mainHandler = new Handler();
-        mediaSource = new ExtractorMediaSource(Uri.parse(newsModel.getAudio()),
+        mediaSource = new ExtractorMediaSource(Uri.parse(newsDetailsModel.getAudio()),
                 dataSourceFactory,
                 extractorsFactory,
                 mainHandler,
@@ -74,7 +74,7 @@ public class PlayerUtils {
         player.prepare(mediaSource);
         player.setPlayWhenReady(true);
         addListeners();
-        currentUrl = newsModel.getAudio();
+        currentUrl = newsDetailsModel.getAudio();
     }
 
     private void addListeners() {

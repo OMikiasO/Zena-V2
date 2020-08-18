@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.mike.zenaplusplus.App;
 import com.mike.zenaplusplus.R;
+import com.mike.zenaplusplus.models.NewsDetailsModel;
 import com.mike.zenaplusplus.models.NewsModel;
 import com.mike.zenaplusplus.repository.NewsRepo;
 import com.mike.zenaplusplus.utils.Controller;
@@ -49,24 +50,24 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.context = context;
     }
 
-    public void setNews(NewsModel newsModel) {
+    public void setNews(NewsDetailsModel newsDetailsModel) {
         this.newsBodyItems.clear();
         this.newsBodyItems.add(MAIN_HEADER);
         this.newsBodyItems.add("headerPlaceHolder");
-        this.newsBodyItems.addAll(newsModel.getBody());
-        if (newsModel.getAudio() != null) {
+        this.newsBodyItems.addAll(newsDetailsModel.getBody());
+        if (newsDetailsModel.getAudio() != null) {
             Log.e(TAG, "Audio initialzing");
             this.newsBodyItems.add(2, AUDIO);
-            this.newsBodyItems.add(3, newsModel.getAudio());
+            this.newsBodyItems.add(3, newsDetailsModel.getAudio());
         }
-        if (!this.newsBodyItems.get(2).equals(IMAGE) && newsModel.getThumbnailLink() != null) {
+        if (!this.newsBodyItems.get(2).equals(IMAGE) && newsDetailsModel.getThumbnailLink() != null) {
             this.newsBodyItems.add(2, IMAGE);
-            this.newsBodyItems.add(3, newsModel.getThumbnailLink());
+            this.newsBodyItems.add(3, newsDetailsModel.getThumbnailLink());
         }
         newsBodyItems.add(SHARE_AND_VISIT);
         newsBodyItems.add("shareAndVisitPlaceHolder");
         newsBodyItems.add(HEADER);
-        newsBodyItems.add("More from "+newsModel.getSource());
+        newsBodyItems.add("More from "+newsDetailsModel.getSource());
         newsBodyItems.add("relatedNewsPlaceHolder");
         newsBodyItems.add("relatedNewsPlaceHolder");
         newsBodyItems.add("relatedNewsPlaceHolder");
@@ -139,7 +140,7 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         void bind(Context context, String bodyItem, String type) {
             Log.e(TAG, type);
-            NewsModel newsModel = NewsRepo.getInstance().selectedNewsModel.getValue();
+            NewsDetailsModel newsDetailsModel = NewsRepo.getInstance().selectedNewsModel.getValue();
             mainHeaderCL.setVisibility(GONE);
             imageCardView.setVisibility(GONE);
             switch (type) {
@@ -148,19 +149,19 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     hideAllExcept(IMAGE);
                     break;
                 case MAIN_HEADER:
-                    ((TextView) mainHeaderCL.findViewById(R.id.titleTextView)).setText(newsModel.getTitle());
-                    ((TextView) mainHeaderCL.findViewById(R.id.categoryTextView)).setText(newsModel.getCategory());
-                    ((TextView) mainHeaderCL.findViewById(R.id.postedTimeTextView)).setText(Utils.getInstance().timeFormatter(newsModel.getPostedTime(), context));
-                    if (newsModel.getAudio() != null) {
+                    ((TextView) mainHeaderCL.findViewById(R.id.titleTextView)).setText(newsDetailsModel.getTitle());
+                    ((TextView) mainHeaderCL.findViewById(R.id.categoryTextView)).setText(newsDetailsModel.getCategory());
+                    ((TextView) mainHeaderCL.findViewById(R.id.postedTimeTextView)).setText(Utils.getInstance().timeFormatter(newsDetailsModel.getPostedTime(), context));
+                    if (newsDetailsModel.getAudio() != null) {
                         (mainHeaderCL.findViewById(R.id.sourceTextView)).setVisibility(GONE);
                         (mainHeaderCL.findViewById(R.id.sourceImageView)).setVisibility(GONE);
                         (mainHeaderCL.findViewById(R.id.firstDotTextView)).setVisibility(GONE);
                     } else {
-                        if (newsModel.isShowSourceText())
-                            ((TextView) mainHeaderCL.findViewById(R.id.sourceTextView)).setText(newsModel.getSource());
+                        if (newsDetailsModel.isShowSourceText())
+                            ((TextView) mainHeaderCL.findViewById(R.id.sourceTextView)).setText(newsDetailsModel.getSource());
                         else (mainHeaderCL.findViewById(R.id.sourceTextView)).setVisibility(GONE);
                         Map<String, String> sourceLogos = App.dynamicVariables.getValue().sourceLogos;
-                        Utils.getInstance().setImageSource(context, sourceLogos.get(newsModel.getSource()), (mainHeaderCL.findViewById(R.id.sourceImageView)));
+                        Utils.getInstance().setImageSource(context, sourceLogos.get(newsDetailsModel.getSource()), (mainHeaderCL.findViewById(R.id.sourceImageView)));
                     }
                     hideAllExcept(MAIN_HEADER);
                     break;
@@ -173,20 +174,20 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     hideAllExcept(HEADER);
                     break;
                 case AUDIO:
-                    PlayerUtils.getInstance().initMediaPlayer(context, newsModel);
+                    PlayerUtils.getInstance().initMediaPlayer(context, newsDetailsModel);
                     ((PlayerControlView) playerCardView.findViewById(R.id.playerView)).setPlayer(PlayerUtils.getInstance().player);
-                    ((TextView) playerCardView.findViewById(R.id.sourceTextView)).setText(newsModel.getSource());
+                    ((TextView) playerCardView.findViewById(R.id.sourceTextView)).setText(newsDetailsModel.getSource());
                     (playerCardView.findViewById(R.id.stopImageButton)).setOnClickListener(v -> {
                         PlayerUtils.getInstance().player.seekTo(0);
                         PlayerUtils.getInstance().player.setPlayWhenReady(false);
                     });
                     Map<String, String> sourceLogos = App.dynamicVariables.getValue().sourceLogos;
-                    Utils.getInstance().setImageSource(context, sourceLogos.get(newsModel.getSource()), (playerCardView.findViewById(R.id.sourceImageView)));
+                    Utils.getInstance().setImageSource(context, sourceLogos.get(newsDetailsModel.getSource()), (playerCardView.findViewById(R.id.sourceImageView)));
                     hideAllExcept(AUDIO);
                     break;
                 case SHARE_AND_VISIT:
-                    shareAndVisitLL.findViewById(R.id.shareBtn).setOnClickListener(v->Utils.getInstance().share(context, newsModel.getLink()));
-                    shareAndVisitLL.findViewById(R.id.visitWebsiteBtn).setOnClickListener(v->Utils.getInstance().openLink(context, newsModel.getLink()));
+                    shareAndVisitLL.findViewById(R.id.shareBtn).setOnClickListener(v->Utils.getInstance().share(context, newsDetailsModel.getLink()));
+                    shareAndVisitLL.findViewById(R.id.visitWebsiteBtn).setOnClickListener(v->Utils.getInstance().openLink(context, newsDetailsModel.getLink()));
                     hideAllExcept(SHARE_AND_VISIT);
                     break;
                 default:
@@ -250,15 +251,7 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     rankingTextView.setText(Utils.getInstance().timeFormatter(newsModel.getPostedTime(), context));
                     postedTimeTextView.setText(newsModel.getCategory());
 
-                    if (newsModel.getNumber() != -1) {
-                        numberTextView.setVisibility(View.VISIBLE);
-                        numberTextView.setText(newsModel.getNumber() + ".");
-                    } else numberTextView.setVisibility(View.GONE);
-
-                    if (newsModel.getNumber() != -1) {
-                        numberTextView.setVisibility(View.VISIBLE);
-                        numberTextView.setText(newsModel.getNumber() + ".");
-                    } else numberTextView.setVisibility(View.GONE);
+                    numberTextView.setVisibility(View.GONE);
 
                     sourceTextView.setText(newsModel.getSource());
                     if (newsModel.isShowSourceText()) sourceTextView.setVisibility(View.VISIBLE);

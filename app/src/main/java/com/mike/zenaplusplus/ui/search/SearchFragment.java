@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -19,7 +20,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,10 +27,12 @@ import com.mike.zenaplusplus.R;
 import com.mike.zenaplusplus.adapter.AutoSuggestAdapter;
 import com.mike.zenaplusplus.adapter.NewsAdapter;
 import com.mike.zenaplusplus.repository.NewsRepo;
+import com.mike.zenaplusplus.utils.CacheUtils;
 import com.mike.zenaplusplus.utils.Controller;
 import com.mike.zenaplusplus.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static android.view.KeyEvent.KEYCODE_ENTER;
 import static android.view.View.GONE;
@@ -70,7 +72,7 @@ public class SearchFragment extends Fragment {
         setUpAutoCompleteTextView(view);
         setUpRecyclerView(savedInstanceState);
         linkWithController();
-//        setUpLastSearchResults();
+        setUpLastSearchResults();
 //        setUpLangs();
     }
 
@@ -110,18 +112,17 @@ public class SearchFragment extends Fragment {
             if (productModels.isEmpty()) {
                 clearCardView.setVisibility(GONE);
                 searchSuggestionsRV.setVisibility(View.VISIBLE);
+                if(searchViewModel.searchedOrCleared) errorStateCL.setVisibility(View.VISIBLE);
+                else errorStateCL.setVisibility(View.GONE);
             } else {
                 clearCardView.setVisibility(View.VISIBLE);
                 searchSuggestionsRV.setVisibility(GONE);
+                errorStateCL.setVisibility(View.GONE);
             }
         });
 
-        NewsRepo.getInstance().noSearchResultFound.observe(getViewLifecycleOwner(), aBoolean -> {
-            if(aBoolean) errorStateCL.setVisibility(View.VISIBLE);
-            else errorStateCL.setVisibility(GONE);
-        });
-
         clearCardView.setOnClickListener(v -> {
+            searchViewModel.searchedOrCleared = false;
             NewsRepo.getInstance().searchResults.setValue(new ArrayList<>());
             NewsRepo.getInstance().searchSuggestions.setValue(new ArrayList<>());
             NewsRepo.getInstance().loadingSuggestions.setValue(false);
@@ -165,7 +166,7 @@ public class SearchFragment extends Fragment {
         autoCompleteTextView.setAdapter(autoSuggestAdapter);
         autoCompleteTextView.setOnItemClickListener((parent, view1, position, id) -> {
             Utils.getInstance().hideKeyboardFrom(getContext(), autoCompleteTextView);
-            NewsRepo.getInstance().searchProduct(NewsRepo.getInstance().searchSuggestions.getValue().get(position));
+            NewsRepo.getInstance().searchNews(NewsRepo.getInstance().searchSuggestions.getValue().get(position));
         });
         autoCompleteTextView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -187,21 +188,14 @@ public class SearchFragment extends Fragment {
         autoCompleteTextView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KEYCODE_ENTER) {
                 Utils.getInstance().hideKeyboardFrom(getContext(), autoCompleteTextView);
-                NewsRepo.getInstance().searchProduct(autoCompleteTextView.getText().toString());
+                NewsRepo.getInstance().searchNews(autoCompleteTextView.getText().toString());
                 autoCompleteTextView.dismissDropDown();
+                searchViewModel.searchedOrCleared = true;
             }
             Log.e(TAG, event.getCharacters() + event.toString() + keyCode);
             return false;
         });
     }
-
-    private void setUpResultsRV() {
-        resultsRV.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        final NewsAdapter newsAdapter = new NewsAdapter(requireActivity().getApplication());
-        NewsRepo.getInstance().searchResults.observe(getViewLifecycleOwner(), newsAdapter::setNewsList);
-        resultsRV.setAdapter(newsAdapter);
-    }
-
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -220,23 +214,23 @@ public class SearchFragment extends Fragment {
         }
     }
 
-//    private void setUpLastSearchResults() {
-//        try {
-//            final ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1);
-//            NewsRepo.getInstance().savedSearchSuggestions.observe(getViewLifecycleOwner(), strings -> {
-//                Collections.reverse(strings);
-//                itemsAdapter.clear();
-//                if(strings.size()>5) itemsAdapter.addAll(strings.subList(0, 5));
-//                else itemsAdapter.addAll(strings);
-//                itemsAdapter.notifyDataSetChanged();
-//            });
-//
-//            searchSuggestionsRV.setAdapter(itemsAdapter);
-//            searchSuggestionsRV.setOnItemClickListener((parent, view, position, id) -> ProductsRepo.getInstance().searchProduct(itemsAdapter.getItem(position)));
-//        } catch (Exception e) {
-//            Log.e(TAG, e.getMessage());
-//        }
-//
-//    }
+    private void setUpLastSearchResults() {
+        try {
+            final ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
+            CacheUtils.getInstance().savedSearchTerms.observe(getViewLifecycleOwner(), strings -> {
+                Collections.reverse(strings);
+                itemsAdapter.clear();
+                if(strings.size()>5) itemsAdapter.addAll(strings.subList(0, 5));
+                else itemsAdapter.addAll(strings);
+                itemsAdapter.notifyDataSetChanged();
+            });
+
+            searchSuggestionsRV.setAdapter(itemsAdapter);
+            searchSuggestionsRV.setOnItemClickListener((parent, view, position, id) -> NewsRepo.getInstance().searchNews(itemsAdapter.getItem(position)));
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+    }
 
 }

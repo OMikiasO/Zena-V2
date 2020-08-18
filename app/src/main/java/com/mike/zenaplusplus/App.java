@@ -32,14 +32,15 @@ public class App extends Application {
 
     @Override
     public void onCreate() {
+        fetchDynamicVariables();
         setUpTheme();
         super.onCreate();
         createNotificationChannels();
         CacheUtils.getInstance().userSharedPref = this.getSharedPreferences(CacheUtils.USER_PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
+        CacheUtils.getInstance().getSavedNewsIds(); // init
+        CacheUtils.getInstance().getSavedSearchTerms(); //init
         Account.getInstance().signIn();
         Account.getInstance().syncUserData();
-        fetchDynamicVariables();
-
     }
 
     private void setUpTheme() {
@@ -63,20 +64,19 @@ public class App extends Application {
         super.onTerminate();
     }
 
-    private void fetchDynamicVariables() {
+    public void fetchDynamicVariables() {
         DocumentReference dynamicVariablesDocRef = FirebaseFirestore.getInstance().document("Public Files/dynamicVariables");
         dynamicVariablesDocRef.get(Source.CACHE).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
+
+            if (task.isSuccessful())
                 dynamicVariables.setValue(task.getResult().toObject(DynamicVariables.class));
-            } else {
-                Log.e(TAG, task.getException().getMessage());
-            }
+            else Log.e(TAG, task.getException().getMessage());
+
             dynamicVariablesDocRef.get().addOnCompleteListener(task1 -> {
-                if (task1.isSuccessful()) {
+                if (task1.isSuccessful())
                     dynamicVariables.setValue(task1.getResult().toObject(DynamicVariables.class));
-                } else {
-                    Log.e(TAG, task1.getException().getMessage());
-                }
+                else Log.e(TAG, task1.getException().getMessage());
+
             });
         });
     }
@@ -84,6 +84,13 @@ public class App extends Application {
     public static class DynamicVariables {
         public HashMap<String, String> sourceLogos = new LinkedHashMap<>();
         public HashMap<String, Map<String, Object>> categories = new HashMap<>();
+        public HashMap<String, Double> rankingVariables = new HashMap<>();
+
+        public DynamicVariables(){
+            rankingVariables.put("P", 30d);
+            rankingVariables.put("freshnessExponent", 1.5);
+            rankingVariables.put("relevanceScoreExponent", 2d);
+        }
     }
 
     private void createNotificationChannels() {
@@ -105,4 +112,5 @@ public class App extends Application {
             manager.createNotificationChannel(channel2);
         }
     }
+
 }
