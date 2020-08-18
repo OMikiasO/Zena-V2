@@ -56,7 +56,7 @@ public class NewsRepo {
     public MutableLiveData<Boolean> failedToFetch = new MutableLiveData<>(false);
     public MutableLiveData<Boolean> loadingNews = new MutableLiveData<>(false);
     public MutableLiveData<Boolean> failedToFetchRelatedNews = new MutableLiveData<>(false);
-    public MutableLiveData<Boolean> loadingRelatedNews = new MutableLiveData<>(false);
+    public MutableLiveData<Boolean> loadingRelatedNews = new MutableLiveData<>(true);
     public MutableLiveData<Boolean> loadingSuggestions = new MutableLiveData<>(false);
     public MutableLiveData<Boolean> loadingSearchResult = new MutableLiveData<>(false);
     public MutableLiveData<Boolean> loadingMainFeed = new MutableLiveData<>(false);
@@ -107,6 +107,8 @@ public class NewsRepo {
     private void fetchNewsById() {
         selectedNewsId.observeForever(id -> {
             if (id.isEmpty() || id.equals(selectedNewsModel.getValue().getId())) return;
+            relatedNewsList.setValue(new ArrayList<>());
+            loadingRelatedNews.setValue(true);
             DocumentReference documentReference = FirebaseFirestore.getInstance().document("NewsDetails/" + id);
             selectedNewsModel.setValue(new NewsDetailsModel());
             loadingNews.setValue(true);
@@ -129,9 +131,7 @@ public class NewsRepo {
                     .collection("News")
                     .whereEqualTo("category", newsModel.getCategory())
                     .whereEqualTo("source", newsModel.getSource())
-                    .limit(4);
-            relatedNewsList.setValue(new ArrayList<>());
-            loadingRelatedNews.setValue(true);
+                    .limit(3);
             failedToFetchRelatedNews.setValue(false);
             query.get().addOnCompleteListener(task -> {
                 loadingRelatedNews.setValue(false);

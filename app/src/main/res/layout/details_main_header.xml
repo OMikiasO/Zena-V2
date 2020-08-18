@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mainHeaderCL"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:visibility="visible">
+
+    <TextView
+        android:id="@+id/sourceTextView"
+        app:layout_constraintBottom_toBottomOf="@+id/categoryTextView"
+        app:layout_constraintStart_toEndOf="@+id/sourceImageView"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:text="TextView"
+        android:textColor="@color/accentPrimary"
+        android:textSize="16sp" />
+
+    <ImageView
+        android:id="@+id/sourceImageView"
+        app:layout_constraintBottom_toBottomOf="@+id/categoryTextView"
+        app:layout_constraintStart_toStartOf="@+id/titleTextView"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView"
+        app:srcCompat="@drawable/googleg_standard_color_18"
+        android:layout_width="wrap_content"
+        android:layout_height="15dp"
+        android:layout_marginTop="8dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY" />
+
+    <TextView
+        android:id="@+id/categoryTextView"
+        app:layout_constraintStart_toEndOf="@+id/firstDotTextView"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-black"
+        android:text="Politics"
+        android:textColor="@color/tertiary"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/postedTimeTextView5"
+        app:layout_constraintStart_toEndOf="@+id/categoryTextView"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-black"
+        android:text="•"
+        android:textColor="@color/accentPrimary"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/firstDotTextView"
+        app:layout_constraintStart_toEndOf="@+id/sourceTextView"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-black"
+        android:text="•"
+        android:textColor="@color/accentPrimary"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/postedTimeTextView"
+        app:layout_constraintStart_toEndOf="@+id/postedTimeTextView5"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:text="9 hours ago"
+        android:textColor="@color/tertiary"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/titleTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="sans-serif-black"
+        android:text="TextView"
+        android:textColor="@color/primary"
+        android:textSize="24sp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

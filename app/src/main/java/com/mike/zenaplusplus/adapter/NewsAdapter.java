@@ -195,7 +195,7 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
 
-    class SmallNewsItemHolder extends RecyclerView.ViewHolder {
+    static class SmallNewsItemHolder extends RecyclerView.ViewHolder {
         TextView titleTextView;
         TextView sourceTextView;
         TextView rankingTextView;
@@ -261,19 +261,19 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 } else {
                     menu.add(0, v.getId(), 0, "Save")
                             .setOnMenuItemClickListener(item -> {
-                                CacheUtils.getInstance().saveNewsId(application.getApplicationContext(), newsModel.getId(), Source.DEFAULT);
+                                CacheUtils.getInstance().saveNewsId(context, newsModel.getId(), Source.DEFAULT);
                                 return true;
                             });
                 }
 
                 menu.add(0, v.getId(), 0, "Share")
                         .setOnMenuItemClickListener(item -> {
-                            Utils.getInstance().share(application, newsModel.getLink());
+                            Utils.getInstance().share(context, newsModel.getLink());
                             return true;
                         });
                 menu.add(0, v.getId(), 0, "Visit website")
                         .setOnMenuItemClickListener(item -> {
-                            Utils.getInstance().openLink(application, newsModel.getLink());
+                            Utils.getInstance().openLink(context, newsModel.getLink());
                             return true;
                         });
             });
