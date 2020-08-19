@@ -41,7 +41,7 @@ public class NewsRepo {
     }
 
     //variables
-    DocumentSnapshot lastMainFeedDoc;
+    private DocumentSnapshot lastMainFeedDoc;
 
     //mutable data
     public MutableLiveData<NewsDetailsModel> selectedNewsModel = new MutableLiveData<>(new NewsDetailsModel());
@@ -61,7 +61,6 @@ public class NewsRepo {
     public MutableLiveData<Boolean> loadingSearchResult = new MutableLiveData<>(false);
     public MutableLiveData<Boolean> loadingMainFeed = new MutableLiveData<>(false);
     public MutableLiveData<Boolean> noSearchResultFound = new MutableLiveData<>(false);
-
 
     public void fetchByCategory(boolean refresh, MutableLiveData<List<NewsModel>> liveData, List<String> queries, long lastPostedTime, MutableLiveData<Boolean> isLoading, MutableLiveData<Boolean> hasLoadedAllItems, MutableLiveData<Boolean> refreshing) {
         if (refresh) refreshing.setValue(true);
@@ -86,7 +85,7 @@ public class NewsRepo {
                     isLoading.setValue(false);
                     refreshing.setValue(false);
                     if (task1.isSuccessful()) {
-                        if (task.getResult().size() % 10 != 0) hasLoadedAllItems.setValue(true);
+                        if (task1.getResult().size() % 10 != 0) hasLoadedAllItems.setValue(true);
                         liveData.setValue(task1.getResult().toObjects(NewsModel.class));
                     }
                 });

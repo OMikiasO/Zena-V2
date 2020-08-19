@@ -19,26 +19,30 @@ import com.mike.zenaplusplus.App;
 import com.mike.zenaplusplus.adapter.NewsAdapter;
 import com.mike.zenaplusplus.models.NewsModel;
 import com.mike.zenaplusplus.repository.NewsRepo;
+import com.mike.zenaplusplus.utils.Controller;
 import com.paginate.Paginate;
 
 import java.util.List;
 
 public class SingleCategoryFeedFragment extends Fragment {
-    private static final String TAG = "ForYouFeedFragment";
+    private static final String TAG = "SingleCategoryFragment";
 
     //vars
     private HeadlinesViewModel headlinesViewModel;
     private String key;
+    private int pagePosition;
+    private boolean recyclerViewIsSetUp = false;
 
     //views
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
 
-    static SingleCategoryFeedFragment newInstance(String key) {
+    static SingleCategoryFeedFragment newInstance(String key, int pagePosition) {
         SingleCategoryFeedFragment f = new SingleCategoryFeedFragment();
         // Supply index input as an argument.
         Bundle args = new Bundle();
         args.putString("key", key);
+        args.putInt("pagePosition", pagePosition);
         f.setArguments(args);
         return f;
     }
@@ -47,6 +51,7 @@ public class SingleCategoryFeedFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
         key = args.getString("key", "-1");
+        pagePosition = args.getInt("pagePosition");
         headlinesViewModel = ViewModelProviders.of(requireActivity()).get(HeadlinesViewModel.class);
         swipeRefreshLayout = new SwipeRefreshLayout(requireContext());
         recyclerView = new RecyclerView(requireContext());
@@ -57,13 +62,25 @@ public class SingleCategoryFeedFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setUpRecyclerView(savedInstanceState);
+        Controller.getInstance().headlinesClicked.observe(getViewLifecycleOwner(), headlinedClicked -> {
+            int currentPage = headlinesViewModel.currentPage.getValue();
+            if(headlinedClicked>0 && currentPage==pagePosition && !recyclerViewIsSetUp) setUpRecyclerView(savedInstanceState);
+        });
+        headlinesViewModel.currentPage.observe(getViewLifecycleOwner(), currentPage->{
+            int headlinedClicked = Controller.getInstance().headlinesClicked.getValue();
+            if(headlinedClicked>0 && currentPage==pagePosition && !recyclerViewIsSetUp) setUpRecyclerView(savedInstanceState);
+        });
         setUpViews();
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putInt("position",((LinearLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition()); // get current recycle view position here.
+        try { // surround this with try cause the recyclerView might not be setup yet.. since it is lazy setup
+            savedInstanceState.putInt("position",((LinearLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition()); // get current recycle view position here.
+        } catch (Exception e){
+            Log.e(TAG, e.getMessage());
+        }
+
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -82,6 +99,7 @@ public class SingleCategoryFeedFragment extends Fragment {
                 .setLoadingTriggerThreshold(0)
                 .addLoadingListItem(true)
                 .build();
+        recyclerViewIsSetUp = true;
     }
 
     private void setUpViews(){

@@ -27,6 +27,7 @@ public class HeadlinesViewModel extends ViewModel {
     Map<String, MutableLiveData<Boolean>> hasLoadedAllItemsStatesMap = new HashMap<>();
     MutableLiveData<Integer> loadingProgressBarVisibility = new MutableLiveData<>(GONE);
     MutableLiveData<Boolean> trigger = new MutableLiveData<>(false);
+    MutableLiveData<Integer> currentPage = new MutableLiveData<>(0);
 
     private void initLiveDataMaps(){
         App.dynamicVariables.observeForever(dynamicVariables -> {

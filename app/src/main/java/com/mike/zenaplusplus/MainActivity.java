@@ -200,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
         headlinesCL.setOnClickListener(v -> {
             Utils.getInstance().navSelect(MainActivity.this, navCardView, 1);
+            Controller.getInstance().headlinesClicked.setValue(Controller.getInstance().headlinesClicked.getValue()+1); // to trigger the setting up of all the category recycler views
             if (lastSelectedItemId[0] != R.id.headlinesCL) {
                 fm.beginTransaction().hide(active).show(fragmentHeadlines).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
                 lastSelectedItemId[0] = R.id.headlinesCL;

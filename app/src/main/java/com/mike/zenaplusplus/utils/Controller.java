@@ -16,5 +16,6 @@ public class Controller {
     public MutableLiveData<Boolean> searchFragment = new MutableLiveData<>(false);
     public MutableLiveData<Boolean> sourcesFragment = new MutableLiveData<>(false);
     public MutableLiveData<Boolean> savedNewsFragment = new MutableLiveData<>(false);
+    public MutableLiveData<Integer> headlinesClicked = new MutableLiveData<>(0);
 
 }
