@@ -8,7 +8,7 @@ android {
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.mike.zenaplusplus"
+        applicationId "com.chaosapps.zena"
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
@@ -77,4 +77,10 @@ dependencies {
 
     //preferences
     implementation 'androidx.preference:preference:1.1.1'
+
+    //admob
+    implementation 'com.google.android.gms:play-services-ads:19.3.0'
+
+    //play store
+    implementation 'com.google.android.play:core:1.8.0'
 }

@@ -6,6 +6,7 @@
     <color name="tintBlack">#1E2C30</color>
     <color name="tintWhite">#E0EBFF</color>
     <color name="background">#171717</color>
+    <color name="backgroundTransparent">#00171717</color>
 
     <color name="blackTranslucent0">#20000000</color>
     <color name="blackTranslucent1">#5E000000</color>

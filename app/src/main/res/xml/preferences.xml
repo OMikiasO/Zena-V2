@@ -7,6 +7,17 @@
         app:key="notifications_category"
         app:title="Notifications">
 
+        <ListPreference
+            android:defaultValue="true"
+            android:entries="@array/entries"
+            android:entryValues="@array/entries"
+            android:key="list_preference_1"
+            android:title="List preference" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="auto_play_audio"
+            android:title="Auto play audio"
+            app:icon="@drawable/auto_play" />
         <DropDownPreference
             android:entries="@array/entries"
             android:entryValues="@array/entry_values"
@@ -15,6 +26,20 @@
             app:key="dark_theme"
             app:title="Dark theme"
             app:useSimpleSummaryProvider="true" />
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="content_category"
+        app:title="Content">
+
+        <Preference
+            android:clickable="true"
+            android:icon="@drawable/feed_settings"
+            app:key="categories"
+            app:summary="Choose the categories you want to see in your feed"
+            app:title="Choose categories" />
 
     </PreferenceCategory>
 
