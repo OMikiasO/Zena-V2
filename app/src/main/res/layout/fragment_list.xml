@@ -23,7 +23,7 @@
 
         <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="56dp"
 
             app:contentInsetStart="0dp">
 
@@ -33,20 +33,20 @@
 
                 <ImageView
                     android:id="@+id/actionBarIV"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
                     android:clickable="true"
                     android:contentDescription="Back"
                     android:focusable="true"
                     android:foreground="?android:selectableItemBackgroundBorderless"
-                    android:padding="8dp"
-                    android:tint="@color/secondary"
+                    android:padding="12dp"
                     android:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_arrow_back_black_24dp" />
+                    app:srcCompat="@drawable/ic_arrow_back_black_24dp"
+                    app:tint="@color/secondary" />
 
                 <TextView
                     android:id="@+id/fragment_title_textView"

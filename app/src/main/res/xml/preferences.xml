@@ -4,28 +4,22 @@
 
     <PreferenceCategory
         android:backgroundTint="@color/quaternary"
-        app:key="notifications_category"
-        app:title="Notifications">
+        app:key="main_category"
+        app:title="Main">
 
         <ListPreference
-            android:defaultValue="true"
+            android:defaultValue="3"
             android:entries="@array/entries"
-            android:entryValues="@array/entries"
-            android:key="list_preference_1"
-            android:title="List preference" />
+            android:entryValues="@array/entry_values"
+            android:key="dark_theme"
+            android:title="Dark theme"
+            app:icon="@drawable/dark_mode"
+            app:useSimpleSummaryProvider="true" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="auto_play_audio"
             android:title="Auto play audio"
             app:icon="@drawable/auto_play" />
-        <DropDownPreference
-            android:entries="@array/entries"
-            android:entryValues="@array/entry_values"
-            app:defaultValue="true"
-            app:icon="@drawable/dark_mode"
-            app:key="dark_theme"
-            app:title="Dark theme"
-            app:useSimpleSummaryProvider="true" />
 
 
     </PreferenceCategory>

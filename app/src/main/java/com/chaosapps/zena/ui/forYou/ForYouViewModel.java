@@ -1,16 +1,12 @@
 package com.chaosapps.zena.ui.forYou;
 
-import android.app.Application;
 import android.util.Log;
 import android.view.View;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.chaosapps.zena.App;
 import com.chaosapps.zena.models.UserModel;
-import com.chaosapps.zena.repository.NewsRepo;
 import com.chaosapps.zena.utils.Account;
 import com.chaosapps.zena.utils.CacheUtils;
 
@@ -19,40 +15,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ForYouViewModel extends AndroidViewModel {
+public class ForYouViewModel extends ViewModel {
     private static final String TAG = "ForYouViewModel";
     static final int SHOW_NON = 0;
     static final int SHOW_CATEGORIES = 1;
     static final int SHOW_FEED = 2;
-    private String feedId = "mainFeed";
 
     //LiveData
     private MutableLiveData<List<String>> selectedCategories = new MutableLiveData<>(new ArrayList<>());
     MutableLiveData<Integer> visibleFragment = new MutableLiveData<>(SHOW_NON);
     MutableLiveData<Integer> loadingProgressBarVisibility = new MutableLiveData<>(View.GONE);
-    MutableLiveData<Map<String, Map<String, Object>>> categoriesMap = new MutableLiveData<>(new HashMap<>());
+    public MutableLiveData<Map<String, Map<String, Object>>> categoriesMap = new MutableLiveData<>(new HashMap<>());
     public MutableLiveData<Boolean> boneBtnEnabled = new MutableLiveData<>(true);
     private int skipper = 0;
 
-    public ForYouViewModel(@NonNull Application application) {
-        super(application);
-        synchronizer();
-    }
-
-    private void synchronizer() {
-        App.dynamicVariables.observeForever(dynamicVariables -> {
-            categoriesMap.setValue(dynamicVariables.categories);
-        });
-        Account.getInstance().user.observeForever(userModel -> {
-            updateSelectedCategories();
-        });
-        NewsRepo.getInstance().loadingMainFeed.observeForever(aBoolean -> {
-            if (aBoolean) loadingProgressBarVisibility.postValue(View.VISIBLE);
-            else loadingProgressBarVisibility.postValue(View.GONE);
-        });
-    }
-
-    private void updateSelectedCategories() {
+    public void updateSelectedCategories() {
         //required vars
         UserModel userModel = Account.getInstance().user.getValue();
 

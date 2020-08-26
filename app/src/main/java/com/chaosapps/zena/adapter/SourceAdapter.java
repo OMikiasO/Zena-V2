@@ -1,6 +1,5 @@
 package com.chaosapps.zena.adapter;
 
-import android.app.Activity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.LifecycleOwner;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chaosapps.zena.R;
@@ -29,13 +28,13 @@ import java.util.Map;
 public class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.DummyAdapterHolder> {
     private final static String TAG = "SourceAdapter";
 
-    private Activity activity;
+    private Fragment fragment;
     private Map<String, String> sourcesMap = new HashMap<>();
     private List<String> sourcesKeys = new ArrayList<>();
 
-    public SourceAdapter(Activity activity) {
-        this.activity = activity;
-        Account.getInstance().user.observe((LifecycleOwner) activity, userModel -> notifyDataSetChanged());
+    public SourceAdapter(Fragment fragment) {
+        this.fragment = fragment;
+        Account.getInstance().user.observe(fragment.getViewLifecycleOwner(), userModel -> notifyDataSetChanged());
     }
 
     public void setSourcesMap(Map<String, String> sourcesMap) {
@@ -78,17 +77,17 @@ public class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.DummyAdapt
         void bind(int position) {
             UserModel userModel = Account.getInstance().user.getValue();
             sourceTextView.setText(sourcesKeys.get(position));
-            Utils.getInstance().setImageSource(activity, sourcesMap.get(sourcesKeys.get(position)), sourceImageView);
+            Utils.getInstance().setImageSource(fragment.getContext(), sourcesMap.get(sourcesKeys.get(position)), sourceImageView);
             followBtn.setOnClickListener(v-> Account.getInstance().followSource(sourcesKeys.get(position)));
             try {
                 if(userModel.getFollowingSources().contains(sourcesKeys.get(position))){
                     followBtn.setOnClickListener(v-> Account.getInstance().unFollowSource(sourcesKeys.get(position)));
                     followBtn.setText("Unfollow");
-                    followBtn.setTextColor(ContextCompat.getColor(activity, R.color.tertiary));
+                    followBtn.setTextColor(ContextCompat.getColor(fragment.getContext(), R.color.tertiary));
                 } else {
                     followBtn.setOnClickListener(v-> Account.getInstance().followSource(sourcesKeys.get(position)));
                     followBtn.setText("Follow");
-                    followBtn.setTextColor(ContextCompat.getColor(activity, R.color.accentPrimary));
+                    followBtn.setTextColor(ContextCompat.getColor(fragment.getContext(), R.color.accentPrimary));
                 }
             } catch (Exception e){
                 Log.e(TAG, e.getMessage());

@@ -1,6 +1,5 @@
 package com.chaosapps.zena.adapter;
 
-import android.app.Application;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chaosapps.zena.App;
@@ -34,12 +34,12 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int BIG_NEWS_ELEMENT = 1;
     private final int SMALL_NEWS_ELEMENT = 2;
 
-    private Application application;
+    private Fragment fragment;
     private List<Object> mainFeed = new ArrayList<>();
 
-    public NewsAdapter(Application application) {
-        this.application = application;
-        CacheUtils.getInstance().savedNewsIds.observeForever(strings -> notifyDataSetChanged());
+    public NewsAdapter(Fragment fragment) {
+        this.fragment = fragment;
+        CacheUtils.getInstance().savedNewsIds.observe(fragment.getViewLifecycleOwner(), strings -> notifyDataSetChanged());
     }
 
     public void setMainFeed(List<Object> mainFeed) {
@@ -101,11 +101,11 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
                 break;
             case SMALL_NEWS_ELEMENT:
-                ((SmallNewsItemHolder) holder).bind(application, (NewsModel) mainFeed.get(position));
+                ((SmallNewsItemHolder) holder).bind(fragment.getContext(), (NewsModel) mainFeed.get(position));
                 break;
             case BIG_NEWS_ELEMENT:
             default:
-                ((NewsItemHolder) holder).bind(application, (NewsModel) mainFeed.get(position));
+                ((NewsItemHolder) holder).bind(fragment.getContext(), (NewsModel) mainFeed.get(position));
                 break;
         }
 
@@ -139,12 +139,12 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             menuImageView = itemView.findViewById(R.id.menuImageView);
         }
 
-        void bind(Application application, NewsModel newsModel) {
+        void bind(Context context, NewsModel newsModel) {
             List<String> savedNewsIds = CacheUtils.getInstance().savedNewsIds.getValue();
             Map<String, String> sourceLogos = App.dynamicVariables.getValue().sourceLogos;
             titleTextView.setText(newsModel.getTitle());
-            Utils.getInstance().setImageSource(application, newsModel.getThumbnailLink(), thumbnailImageView);
-            rankingTextView.setText(Utils.getInstance().timeFormatter(newsModel.getPostedTime(), application));
+            Utils.getInstance().setImageSource(context, newsModel.getThumbnailLink(), thumbnailImageView);
+            rankingTextView.setText(Utils.getInstance().timeFormatter(newsModel.getPostedTime(), context));
             postedTimeTextView.setText(newsModel.getCategory());
 
             if (newsModel.getNumber() != -1) {
@@ -155,7 +155,7 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             sourceTextView.setText(newsModel.getSource());
             if (newsModel.isShowSourceText()) sourceTextView.setVisibility(View.VISIBLE);
             else sourceTextView.setVisibility(View.GONE);
-            Utils.getInstance().setImageSource(application, sourceLogos.get(newsModel.getSource()), sourceImageView);
+            Utils.getInstance().setImageSource(context, sourceLogos.get(newsModel.getSource()), sourceImageView);
 
             menuImageView.setOnClickListener(v -> itemView.showContextMenu());
 
@@ -175,19 +175,19 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 } else {
                     menu.add(0, v.getId(), 0, "Save")
                             .setOnMenuItemClickListener(item -> {
-                                CacheUtils.getInstance().saveNewsId(application.getApplicationContext(), newsModel.getId(), Source.DEFAULT);
+                                CacheUtils.getInstance().saveNewsId(context.getApplicationContext(), newsModel.getId(), Source.DEFAULT);
                                 return true;
                             });
                 }
 
                 menu.add(0, v.getId(), 0, "Share")
                         .setOnMenuItemClickListener(item -> {
-                            Utils.getInstance().share(application, newsModel.getLink());
+                            Utils.getInstance().share(context, newsModel.getLink());
                             return true;
                         });
                 menu.add(0, v.getId(), 0, "Visit website")
                         .setOnMenuItemClickListener(item -> {
-                            Utils.getInstance().openLink(application, newsModel.getLink());
+                            Utils.getInstance().openLink(context, newsModel.getLink());
                             return true;
                         });
             });

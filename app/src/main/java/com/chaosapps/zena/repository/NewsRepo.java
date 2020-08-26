@@ -11,8 +11,6 @@ import com.chaosapps.zena.models.NewsModel;
 import com.chaosapps.zena.utils.Account;
 import com.chaosapps.zena.utils.AdUtils;
 import com.chaosapps.zena.utils.CacheUtils;
-import com.chaosapps.zena.utils.ConnectionUtils;
-import com.chaosapps.zena.utils.Controller;
 import com.chaosapps.zena.utils.Utils;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -28,6 +26,29 @@ import java.util.Set;
 public class NewsRepo {
     private static final String TAG = "NewsRepo";
     private static NewsRepo INSTANCE;
+    //mutable data
+    public MutableLiveData<NewsDetailsModel> selectedNewsModel = new MutableLiveData<>(new NewsDetailsModel());
+    public MutableLiveData<List<NewsModel>> relatedNewsList = new MutableLiveData<>(new ArrayList<>());
+    public MutableLiveData<String> selectedNewsId = new MutableLiveData<>("");
+    public MutableLiveData<List<NewsModel>> savedNewsModels = new MutableLiveData<>(new ArrayList<>());
+    public MutableLiveData<ArrayList<String>> searchSuggestions = new MutableLiveData<>();
+    public MutableLiveData<List<NewsModel>> searchResults = new MutableLiveData<>();
+    public MutableLiveData<List<Object>> mainFeedNewsList = new MutableLiveData<>(new ArrayList<>());
+    public MutableLiveData<List<NewsModel>> newsModelsBySource = new MutableLiveData<>(new ArrayList<>());
+    public MutableLiveData<String> selectedSource = new MutableLiveData<>("");
+    //stateObjects
+    public MutableLiveData<Boolean> failedToFetch = new MutableLiveData<>(false);
+    public MutableLiveData<Boolean> loadingNews = new MutableLiveData<>(false);
+    public MutableLiveData<Boolean> failedToFetchRelatedNews = new MutableLiveData<>(false);
+    public MutableLiveData<Boolean> loadingRelatedNews = new MutableLiveData<>(true);
+    public MutableLiveData<Boolean> loadingSuggestions = new MutableLiveData<>(false);
+    public MutableLiveData<Boolean> loadingSearchResult = new MutableLiveData<>(false);
+    public MutableLiveData<Boolean> loadingMainFeed = new MutableLiveData<>(false);
+    public MutableLiveData<Boolean> noSearchResultFound = new MutableLiveData<>(false);
+    public MutableLiveData<Boolean> loadingNewsBySource = new MutableLiveData<>(false);
+    //variables
+    private DocumentSnapshot lastMainFeedDoc;
+    private DocumentSnapshot lastSourceNewsDoc;
 
     public static synchronized NewsRepo getInstance() {
         if (INSTANCE == null) {
@@ -42,32 +63,6 @@ public class NewsRepo {
         fetchRelatedNews();
         fetchSavedNewsDetailsFromCache();
     }
-
-    //variables
-    private DocumentSnapshot lastMainFeedDoc;
-    private DocumentSnapshot lastSourceNewsDoc;
-
-    //mutable data
-    public MutableLiveData<NewsDetailsModel> selectedNewsModel = new MutableLiveData<>(new NewsDetailsModel());
-    public MutableLiveData<List<NewsModel>> relatedNewsList = new MutableLiveData<>(new ArrayList<>());
-    public MutableLiveData<String> selectedNewsId = new MutableLiveData<>("");
-    public MutableLiveData<List<NewsModel>> savedNewsModels = new MutableLiveData<>(new ArrayList<>());
-    public MutableLiveData<ArrayList<String>> searchSuggestions = new MutableLiveData<>();
-    public MutableLiveData<List<NewsModel>> searchResults = new MutableLiveData<>();
-    public MutableLiveData<List<Object>> mainFeedNewsList = new MutableLiveData<>(new ArrayList<>());
-    public MutableLiveData<List<NewsModel>> newsModelsBySource = new MutableLiveData<>(new ArrayList<>());
-    public MutableLiveData<String> selectedSource = new MutableLiveData<>("");
-
-    //stateObjects
-    public MutableLiveData<Boolean> failedToFetch = new MutableLiveData<>(false);
-    public MutableLiveData<Boolean> loadingNews = new MutableLiveData<>(false);
-    public MutableLiveData<Boolean> failedToFetchRelatedNews = new MutableLiveData<>(false);
-    public MutableLiveData<Boolean> loadingRelatedNews = new MutableLiveData<>(true);
-    public MutableLiveData<Boolean> loadingSuggestions = new MutableLiveData<>(false);
-    public MutableLiveData<Boolean> loadingSearchResult = new MutableLiveData<>(false);
-    public MutableLiveData<Boolean> loadingMainFeed = new MutableLiveData<>(false);
-    public MutableLiveData<Boolean> noSearchResultFound = new MutableLiveData<>(false);
-    public MutableLiveData<Boolean> loadingNewsBySource = new MutableLiveData<>(false);
 
     public void fetchByCategory(boolean refresh, MutableLiveData<List<NewsModel>> liveData, List<String> queries, long lastPostedTime, MutableLiveData<Boolean> isLoading, MutableLiveData<Boolean> hasLoadedAllItems, MutableLiveData<Boolean> refreshing) {
         if (refresh) refreshing.setValue(true);
@@ -135,17 +130,22 @@ public class NewsRepo {
 
     private void fetchNewsById() {
         selectedNewsId.observeForever(id -> {
-            if (id.isEmpty() || id.equals(selectedNewsModel.getValue().getId())) return;
+            selectedNewsModel.setValue(new NewsDetailsModel());
             relatedNewsList.setValue(new ArrayList<>());
+            if (id.isEmpty()) return;
             loadingRelatedNews.setValue(true);
             DocumentReference documentReference = FirebaseFirestore.getInstance().document("NewsDetails/" + id);
-            selectedNewsModel.setValue(new NewsDetailsModel());
+
             loadingNews.setValue(true);
             failedToFetch.setValue(false);
             documentReference.get().addOnCompleteListener(task -> {
+
                 loadingNews.setValue(false);
                 if (task.isSuccessful()) {
-                    selectedNewsModel.setValue(task.getResult().toObject(NewsDetailsModel.class));
+//                    selectedNewsModel.setValue(null);
+                    if(selectedNewsId.getValue().equals(task.getResult().toObject(NewsDetailsModel.class).getId())){
+                        selectedNewsModel.setValue(task.getResult().toObject(NewsDetailsModel.class));
+                    }
                 } else {
                     failedToFetch.setValue(true);
                 }
@@ -155,7 +155,7 @@ public class NewsRepo {
 
     private void fetchRelatedNews() {
         selectedNewsModel.observeForever(newsModel -> {
-            if (newsModel == null || newsModel.getCategory() == null) return;
+            if (newsModel.getBody().isEmpty() && relatedNewsList.getValue().size()!=0) return;
             Query query = FirebaseFirestore.getInstance()
                     .collection("News")
                     .whereEqualTo("category", newsModel.getCategory())
@@ -172,7 +172,8 @@ public class NewsRepo {
                         }
                     }
                     newsModels.remove(newsModel);
-                    relatedNewsList.setValue(newsModels);
+                    Log.e(TAG, newsModels.size()+" - - - - - - - - - -");
+                    if(newsModels.size()<=3)relatedNewsList.setValue(newsModels);
 
                 } else {
                     failedToFetchRelatedNews.setValue(true);
@@ -267,8 +268,6 @@ public class NewsRepo {
                     if(!AdUtils.getInstance().adsInitialized) AdUtils.getInstance().initAds(context);
                     Utils.getInstance().buildMainFeed(task.getResult().toObjects(NewsModel.class), loadMore);
                     lastMainFeedDoc = task.getResult().getDocuments().get(task.getResult().size() - 1);
-                } else {
-                    Controller.getInstance().noInternet.setValue(true);
                 }
             });
         } catch (Exception e) {
@@ -276,7 +275,7 @@ public class NewsRepo {
         }
     }
 
-    public void fetchNewsForMainFeedFromCache(Context context) {
+    public void fetchNewsForMainFeedFromCache() {
         try {
             Query query = FirebaseFirestore.getInstance().collection("News").limit(30);
             List<String> queryStrings = new ArrayList<>();
@@ -289,8 +288,6 @@ public class NewsRepo {
                 if (task.isSuccessful() && task.getResult().size()!=0) {
                     Utils.getInstance().buildMainFeed(task.getResult().toObjects(NewsModel.class), false);
                     lastMainFeedDoc = task.getResult().getDocuments().get(task.getResult().size() - 1);
-                } else if(task.getResult().size()==0 && !ConnectionUtils.isConnected(context)) {
-                    Controller.getInstance().noInternet.setValue(true);
                 }
             });
         } catch (Exception e) {

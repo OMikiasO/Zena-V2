@@ -15,7 +15,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.chaosapps.zena.App;
 import com.chaosapps.zena.R;
+import com.chaosapps.zena.repository.NewsRepo;
 import com.chaosapps.zena.utils.Account;
 import com.chaosapps.zena.utils.Controller;
 import com.chaosapps.zena.utils.Utils;
@@ -48,13 +50,26 @@ public class ForYouFragment extends Fragment {
         setUpViews();
         setUpFragments(savedInstanceState);
         setUpSwitcher();
+        synchronizer();
     }
 
     private void allFindViewByIds(View view) {
         feedSettingsImageView = view.findViewById(R.id.feedSettingsImageView);
         loadingFeedProgressBar = view.findViewById(R.id.loadingFeedProgressBar);
-//        feedRefreshView = view.findViewById(R.id.feedRefreshView);
         searchImageView = view.findViewById(R.id.searchImageView);
+    }
+
+    private void synchronizer() {
+        App.dynamicVariables.observe(getViewLifecycleOwner(),dynamicVariables -> {
+            forYouViewModel.categoriesMap.setValue(dynamicVariables.categories);
+        });
+        Account.getInstance().user.observe(getViewLifecycleOwner(),userModel -> {
+            forYouViewModel.updateSelectedCategories();
+        });
+        NewsRepo.getInstance().loadingMainFeed.observe(getViewLifecycleOwner(),aBoolean -> {
+            if (aBoolean) forYouViewModel.loadingProgressBarVisibility.postValue(View.VISIBLE);
+            else forYouViewModel.loadingProgressBarVisibility.postValue(View.GONE);
+        });
     }
 
     private void setUpViews() {
@@ -71,17 +86,9 @@ public class ForYouFragment extends Fragment {
                     } else
                         Utils.getInstance().makeToast(requireContext(), "Please choose categories before you continue");
                 }
-
             }
-
         });
-
         forYouViewModel.loadingProgressBarVisibility.observe(getViewLifecycleOwner(), loadingFeedProgressBar::setVisibility);
-
-//        feedRefreshView.setOnRefreshListener(() -> {
-//            NewsRepo.getInstance().fetchNewsForMainFeed(getContext(),false);
-//            feedRefreshView.setRefreshing(false);
-//        });
         searchImageView.setOnClickListener(v -> Controller.getInstance().searchFragment.setValue(true));
     }
 

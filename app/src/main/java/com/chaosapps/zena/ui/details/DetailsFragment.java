@@ -1,5 +1,6 @@
 package com.chaosapps.zena.ui.details;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chaosapps.zena.R;
 import com.chaosapps.zena.adapter.DetailsAdapter;
 import com.chaosapps.zena.repository.NewsRepo;
+import com.chaosapps.zena.utils.CacheUtils;
 import com.chaosapps.zena.utils.Controller;
 import com.chaosapps.zena.utils.Utils;
 
@@ -38,6 +41,8 @@ public class DetailsFragment extends Fragment {
     private ImageView shareImageView;
     private ImageView visitWebsiteImageView;
     private ImageView saveImageView;
+
+    public MutableLiveData<Boolean> clearPlayer = new MutableLiveData<>(false);
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +62,7 @@ public class DetailsFragment extends Fragment {
         setUpRecyclerView(savedInstanceState);
         setUpViews();
         linkWithController();
+        synchronizer(getContext());
     }
 
     private void allFindViewByIds(View view) {
@@ -70,6 +76,16 @@ public class DetailsFragment extends Fragment {
         saveImageView = view.findViewById(R.id.saveImageView);
     }
 
+    private void synchronizer(Context context) {
+        NewsRepo.getInstance().loadingNews.observe(getViewLifecycleOwner(), aBoolean -> detailsViewModel.updateViewItems(context));
+
+        NewsRepo.getInstance().failedToFetch.observe(getViewLifecycleOwner(), aBoolean -> detailsViewModel.updateViewItems(context));
+
+        NewsRepo.getInstance().selectedNewsModel.observe(getViewLifecycleOwner(), newsModel -> detailsViewModel.updateViewItems(context));
+
+        CacheUtils.getInstance().savedNewsIds.observe(getViewLifecycleOwner(), strings -> detailsViewModel.updateViewItems(context));
+    }
+
     private void setUpViews() {
         actionBarIV.setOnClickListener(v -> Controller.getInstance().detailsFragment.setValue(false));
         detailsViewModel.progressBarVisibility.observe(getViewLifecycleOwner(), progressBar::setVisibility);
@@ -80,7 +96,7 @@ public class DetailsFragment extends Fragment {
         shareImageView.setOnClickListener(v -> Utils.getInstance().share(requireContext(), NewsRepo.getInstance().selectedNewsModel.getValue().getLink()));
         visitWebsiteImageView.setOnClickListener(v -> Utils.getInstance().openLink(requireContext(), NewsRepo.getInstance().selectedNewsModel.getValue().getLink()));
 
-        detailsViewModel.saveImageSourceId.observe(getViewLifecycleOwner(), saveImageView::setImageDrawable);
+        detailsViewModel.saveImageSourceId.observe(getViewLifecycleOwner(), resourceId -> saveImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), resourceId)));
 
         detailsViewModel.saveImageColor.observe(getViewLifecycleOwner(), colorId -> saveImageView.setColorFilter(ContextCompat.getColor(requireContext(), colorId)));
         detailsViewModel.onSaveClickListener.observe(getViewLifecycleOwner(), saveImageView::setOnClickListener);
@@ -95,7 +111,7 @@ public class DetailsFragment extends Fragment {
     private void setUpRecyclerView(Bundle savedInstanceState) {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setVerticalScrollBarEnabled(false);
-        DetailsAdapter detailsAdapter = new DetailsAdapter(getContext());
+        DetailsAdapter detailsAdapter = new DetailsAdapter(this);
         NewsRepo.getInstance().selectedNewsModel.observe(getViewLifecycleOwner(), newsDetailsModel -> {
             if (!newsDetailsModel.getBody().isEmpty()) detailsAdapter.setNews(newsDetailsModel);
         });
@@ -108,6 +124,7 @@ public class DetailsFragment extends Fragment {
     private void linkWithController() {
         Controller.getInstance().detailsFragment.observe(getViewLifecycleOwner(), aBoolean -> {
             if (!aBoolean) {
+                clearPlayer.setValue(true);
                 getParentFragmentManager().beginTransaction().remove(DetailsFragment.this).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
             }
         });

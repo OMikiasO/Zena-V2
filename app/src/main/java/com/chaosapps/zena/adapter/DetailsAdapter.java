@@ -11,16 +11,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.lifecycle.LifecycleOwner;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.chaosapps.zena.App;
 import com.chaosapps.zena.R;
 import com.chaosapps.zena.models.NewsDetailsModel;
 import com.chaosapps.zena.repository.NewsRepo;
+import com.chaosapps.zena.ui.details.DetailsFragment;
 import com.chaosapps.zena.utils.PlayerUtils;
 import com.chaosapps.zena.utils.Utils;
+import com.google.android.exoplayer2.ui.PlayerControlView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ import static android.view.View.GONE;
 public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final static String TAG = "DetailsAdapter";
 
-    private Context context;
+    private Fragment fragment;
     private List<String> newsBodyItems = new ArrayList<>();
     private final int ITEM_TYPE = 1;
     private final int RELATED_NEWS = 2;
@@ -43,8 +44,8 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static final int SHARE_AND_VISIT = 8;
     private static final int PROGRESS_BAR = 9;
 
-    public DetailsAdapter(Context context) {
-        this.context = context;
+    public DetailsAdapter(Fragment fragment) {
+        this.fragment = fragment;
 
     }
 
@@ -70,30 +71,32 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Log.e(TAG, this.newsBodyItems.toString());
         notifyDataSetChanged();
 
-        NewsRepo.getInstance().loadingRelatedNews.observe((LifecycleOwner) context, aBoolean -> {
+        NewsRepo.getInstance().loadingRelatedNews.observe(fragment.getViewLifecycleOwner(), aBoolean -> {
             try {
-                if(!aBoolean) {
+                if (!aBoolean) {
                     int indexOfProgressBar = newsBodyItems.indexOf("progressBarPlaceHolder");
                     newsBodyItems.remove("progressBar");
                     newsBodyItems.remove("progressBarPlaceHolder");
-                    notifyItemRangeRemoved(indexOfProgressBar-1,2);
+                    notifyDataSetChanged();
+//                    notifyItemRangeRemoved(indexOfProgressBar - 1, 2);
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
             }
         });
 
-        NewsRepo.getInstance().relatedNewsList.observe((LifecycleOwner) context, newsModelList -> {
+        NewsRepo.getInstance().relatedNewsList.observe(fragment.getViewLifecycleOwner(), newsModelList -> {
 
-                if(newsModelList.size()>0){
-                    newsBodyItems.add("header");
-                    newsBodyItems.add("More from "+newsDetailsModel.getSource());
-                    for (int i = 0; i < newsModelList.size(); i++) {
-                        newsBodyItems.add("relatedNews");
-                        newsBodyItems.add(""+i);
-                    }
-                    notifyItemRangeInserted(newsBodyItems.size(), newsModelList.size());
+            if (newsModelList.size() > 0) {
+                newsBodyItems.add("header");
+                newsBodyItems.add("More from " + newsDetailsModel.getSource());
+                for (int i = 0; i < newsModelList.size(); i++) {
+                    newsBodyItems.add("relatedNews");
+                    newsBodyItems.add("" + i);
                 }
+                notifyDataSetChanged();
+//                notifyItemRangeInserted(newsBodyItems.size(), newsModelList.size());
+            }
 
         });
 
@@ -167,25 +170,25 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         int viewType = getItemViewType(position);
         switch (viewType) {
             case RELATED_NEWS:
-                ((NewsAdapter.SmallNewsItemHolder) holder).bind(context, NewsRepo.getInstance().relatedNewsList.getValue().get(Integer.parseInt(newsBodyItems.get(position))));
+                ((NewsAdapter.SmallNewsItemHolder) holder).bind(fragment.getContext(), NewsRepo.getInstance().relatedNewsList.getValue().get(Integer.parseInt(newsBodyItems.get(position))));
                 break;
             case IMAGE:
-                ((ImageItemHolder) holder).bind(context, newsBodyItems.get(position));
+                ((ImageItemHolder) holder).bind(fragment.getContext(), newsBodyItems.get(position));
                 break;
             case HEADER:
                 ((HeaderItemHolder) holder).bind(newsBodyItems.get(position));
                 break;
             case MAIN_HEADER:
-                ((MainHeaderItemHolder) holder).bind(context);
+                ((MainHeaderItemHolder) holder).bind(fragment.getContext());
                 break;
             case PARAGRAPH:
                 ((ParagraphItemHolder) holder).bind(newsBodyItems.get(position));
                 break;
             case AUDIO:
-                ((PlayerItemHolder) holder).bind(context);
+                ((PlayerItemHolder) holder).bind(fragment);
                 break;
             case SHARE_AND_VISIT:
-                ((ShareAndVisitItemHolder) holder).bind(context);
+                ((ShareAndVisitItemHolder) holder).bind(fragment.getContext());
                 break;
         }
     }
@@ -270,9 +273,8 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             playerCardView = itemView.findViewById(R.id.playerCardView);
         }
 
-        void bind(Context context) {
+        void bind(Fragment fragment) {
             NewsDetailsModel newsDetailsModel = NewsRepo.getInstance().selectedNewsModel.getValue();
-            PlayerUtils.getInstance().initMediaPlayer(context, newsDetailsModel);
             ((PlayerControlView) playerCardView.findViewById(R.id.playerView)).setPlayer(PlayerUtils.getInstance().player);
             ((TextView) playerCardView.findViewById(R.id.sourceTextView)).setText(newsDetailsModel.getSource());
             (playerCardView.findViewById(R.id.stopImageButton)).setOnClickListener(v -> {
@@ -280,7 +282,13 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 PlayerUtils.getInstance().player.setPlayWhenReady(false);
             });
             Map<String, String> sourceLogos = App.dynamicVariables.getValue().sourceLogos;
-            Utils.getInstance().setImageSource(context, sourceLogos.get(newsDetailsModel.getSource()), (playerCardView.findViewById(R.id.sourceImageView)));
+            Utils.getInstance().setImageSource(fragment.getContext(), sourceLogos.get(newsDetailsModel.getSource()), (playerCardView.findViewById(R.id.sourceImageView)));
+
+            ((DetailsFragment) fragment).clearPlayer.observe(fragment.getViewLifecycleOwner(), aBoolean -> {
+                if (aBoolean) {
+                    ((PlayerControlView) playerCardView.findViewById(R.id.playerView)).setPlayer(null);
+                }
+            });
         }
     }
 

@@ -27,6 +27,7 @@ import com.chaosapps.zena.ui.headlines.HeadlinesFragment;
 import com.chaosapps.zena.ui.more.MoreFragment;
 import com.chaosapps.zena.ui.search.SearchFragment;
 import com.chaosapps.zena.utils.Account;
+import com.chaosapps.zena.utils.AppRater;
 import com.chaosapps.zena.utils.ConnectionUtils;
 import com.chaosapps.zena.utils.Controller;
 import com.chaosapps.zena.utils.PlayerUtils;
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         setUpMiniPlayer();
         setUpNoInternetCL();
 
+        AppRater.app_launched(this);
     }
 
 
@@ -304,6 +306,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, e.getMessage());
             }
         });
+
+        NewsRepo.getInstance().selectedNewsModel.observe(this, newsDetailsModel -> {
+            if(newsDetailsModel.getAudio()!=null){
+                PlayerUtils.getInstance().initMediaPlayer(this, newsDetailsModel);
+            }
+        });
     }
 
     private void setUpNoInternetCL(){
@@ -346,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.e(TAG, "CHANGE");
-        recreate(); // thia ia crucial if u r using adapters;
+        recreate(); // this is crucial if u r using adapters;
     }
 
     @Override
@@ -390,4 +398,14 @@ public class MainActivity extends AppCompatActivity {
         intent.removeExtra("notificationType");
     }
 
+    @Override
+    protected void onDestroy() {
+        try{
+            PlayerUtils.getInstance().player.release();
+        } catch(Exception e){
+            Log.e(TAG, e.getMessage());
+        }
+
+        super.onDestroy();
+    }
 }

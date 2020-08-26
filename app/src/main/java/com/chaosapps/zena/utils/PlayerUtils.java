@@ -1,6 +1,6 @@
 package com.chaosapps.zena.utils;
 
-import android.content.Context;
+import android.app.Activity;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Handler;
@@ -8,6 +8,7 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.chaosapps.zena.models.NewsDetailsModel;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -27,7 +28,6 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.chaosapps.zena.models.NewsDetailsModel;
 
 public class PlayerUtils {
     private static final String TAG = "PlayerUtils";
@@ -48,7 +48,7 @@ public class PlayerUtils {
     public MutableLiveData<NewsDetailsModel> currentlyPlayingNewsModel = new MutableLiveData<>();
     public MutableLiveData<Integer> position = new MutableLiveData<>(0);
 
-    public void initMediaPlayer(Context context, NewsDetailsModel newsDetailsModel) {
+    public void initMediaPlayer(Activity activity, NewsDetailsModel newsDetailsModel) {
         currentlyPlayingNewsModel.setValue(newsDetailsModel);
         if (newsDetailsModel.getAudio().equals(currentUrl)) {
             if (player != null) return;
@@ -56,18 +56,18 @@ public class PlayerUtils {
             if (player != null) player.release();
         }
 
-        renderersFactory = new DefaultRenderersFactory(context.getApplicationContext());
-        bandwidthMeter = new DefaultBandwidthMeter();
-        trackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        trackSelector = new DefaultTrackSelector(trackSelectionFactory);
-        loadControl = new DefaultLoadControl();
+        RenderersFactory renderersFactory = new DefaultRenderersFactory(activity);
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
+        LoadControl loadControl = new DefaultLoadControl();
 
-        player = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl);
+        player = ExoPlayerFactory.newSimpleInstance(activity, renderersFactory, trackSelector, loadControl);
 
-        dataSourceFactory = new DefaultDataSourceFactory(context.getApplicationContext(), "ExoplayerDemo");
-        extractorsFactory = new DefaultExtractorsFactory();
-        mainHandler = new Handler();
-        mediaSource = new ExtractorMediaSource(Uri.parse(newsDetailsModel.getAudio()),
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(activity, "ExoplayerDemo");
+        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+        Handler mainHandler = new Handler();
+        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(newsDetailsModel.getAudio()),
                 dataSourceFactory,
                 extractorsFactory,
                 mainHandler,
@@ -95,16 +95,7 @@ public class PlayerUtils {
         });
     }
 
-    private Handler mainHandler;
-    private RenderersFactory renderersFactory;
-    private BandwidthMeter bandwidthMeter;
-    private LoadControl loadControl;
-    private DataSource.Factory dataSourceFactory;
-    private ExtractorsFactory extractorsFactory;
-    private MediaSource mediaSource;
-    private TrackSelection.Factory trackSelectionFactory;
     public SimpleExoPlayer player;
-    private TrackSelector trackSelector;
 
 
 }

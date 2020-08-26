@@ -7,14 +7,14 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.chaosapps.zena.models.UserModel;
+import com.chaosapps.zena.repository.NewsRepo;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
-import com.chaosapps.zena.models.UserModel;
-import com.chaosapps.zena.repository.NewsRepo;
 
 public class Account implements Parcelable {
     private static Account INSTANCE;
@@ -77,13 +77,13 @@ public class Account implements Parcelable {
         FirebaseFirestore.getInstance().collection("Users").document(userId).get(Source.CACHE).addOnCompleteListener(taskA -> {
             if (taskA.isSuccessful()) {
                 user.setValue(taskA.getResult().toObject(UserModel.class));
-                NewsRepo.getInstance().fetchNewsForMainFeedFromCache(context);
+                NewsRepo.getInstance().fetchNewsForMainFeedFromCache();
                 NewsRepo.getInstance().fetchNewsForMainFeed(context,false);
             } else {
                 FirebaseFirestore.getInstance().collection("Users").document(userId).get().addOnCompleteListener(task1 -> {
                     if (task1.isSuccessful()) {
                         user.setValue(task1.getResult().toObject(UserModel.class));
-                        NewsRepo.getInstance().fetchNewsForMainFeedFromCache(context);
+                        NewsRepo.getInstance().fetchNewsForMainFeedFromCache();
                         NewsRepo.getInstance().fetchNewsForMainFeed(context,false);
                     } else {
                         Log.e(TAG, task1.getException().getMessage());
@@ -118,9 +118,10 @@ public class Account implements Parcelable {
     private void topicAdder() {
         NewsRepo.getInstance().selectedNewsModel.observeForever(newsDetailsModel -> {
             UserModel userModel = user.getValue();
-            if (newsDetailsModel.getBody().isEmpty() || userModel.getUserId() == null) return;
+            if (newsDetailsModel == null || newsDetailsModel.getBody().isEmpty() || userModel.getUserId() == null)
+                return;
             for (String topic : newsDetailsModel.getTopics().keySet()) {
-                if(newsDetailsModel.getTopics().get(topic)<0.8) continue;
+                if (newsDetailsModel.getTopics().get(topic) < 0.8) continue;
                 if (userModel.getTopicsData().get(topic) == null) {
                     userModel.getTopicsData().put(topic, 1);
                 } else {
@@ -136,7 +137,8 @@ public class Account implements Parcelable {
     private void viewNumberUpdater(){
         NewsRepo.getInstance().selectedNewsModel.observeForever(newsDetailsModel -> {
             UserModel userModel = user.getValue();
-            if (newsDetailsModel.getBody().isEmpty() || userModel.getUserId() == null) return;
+            if (newsDetailsModel == null || newsDetailsModel.getBody().isEmpty() || userModel.getUserId() == null)
+                return;
             FirebaseFirestore.getInstance().document("News/"+newsDetailsModel.getId()).update("views", FieldValue.increment(1));
         });
     }

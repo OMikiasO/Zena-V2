@@ -42,7 +42,6 @@ public class HeadlinesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         headlinesViewModel = ViewModelProviders.of(requireActivity()).get(HeadlinesViewModel.class);
-        headlinesViewModel.init();
         return inflater.inflate(R.layout.fragment_hedlines, container, false);
     }
 
@@ -57,8 +56,8 @@ public class HeadlinesFragment extends Fragment {
         headlinesViewModel.trigger.observe(getViewLifecycleOwner(), aBoolean -> {
             if(aBoolean) setUpViewPagerAndTab();
         });
+        App.dynamicVariables.observe(getViewLifecycleOwner(),dynamicVariables -> headlinesViewModel.initLiveDataMaps(dynamicVariables));
     }
-
 
     private void allFindViewByIds(View view){
         viewPager = view.findViewById(R.id.viewPager);

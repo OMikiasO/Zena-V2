@@ -48,7 +48,7 @@ public class ForYouFeedFragment extends Fragment {
 
     private void setUpRecyclerView(Bundle savedInstanceState){
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        NewsAdapter newsAdapter = new NewsAdapter(requireActivity().getApplication());
+        NewsAdapter newsAdapter = new NewsAdapter(this);
         NewsRepo.getInstance().mainFeedNewsList.observe(getViewLifecycleOwner(), newsAdapter::setMainFeed);
         recyclerView.setAdapter(newsAdapter);
         if (savedInstanceState != null) {

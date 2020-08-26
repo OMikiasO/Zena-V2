@@ -1,6 +1,8 @@
 package com.chaosapps.zena.ui.more;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 
@@ -32,6 +34,11 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             if(!Controller.getInstance().showCategories.getValue()){
                 Controller.getInstance().showCategories.setValue(true);
             }
+            return false;
+        });
+
+        findPreference("feedback").setOnPreferenceClickListener(preference -> {
+            getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.chaosapps.zena")));
             return false;
         });
     }

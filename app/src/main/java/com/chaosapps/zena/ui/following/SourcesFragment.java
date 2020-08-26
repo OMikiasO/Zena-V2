@@ -62,7 +62,7 @@ public class SourcesFragment extends Fragment {
 
     private void setUpRecyclerView(Bundle savedInstanceState){
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        SourceAdapter sourceAdapter = new SourceAdapter(requireActivity());
+        SourceAdapter sourceAdapter = new SourceAdapter(this);
         App.dynamicVariables.observe(getViewLifecycleOwner(), dynamicVariables -> sourceAdapter.setSourcesMap(dynamicVariables.sourceLogos));
         recyclerView.setAdapter(sourceAdapter);
         if(savedInstanceState != null){

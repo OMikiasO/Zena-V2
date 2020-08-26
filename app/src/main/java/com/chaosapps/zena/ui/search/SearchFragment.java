@@ -206,7 +206,7 @@ public class SearchFragment extends Fragment {
 
     private void setUpRecyclerView(Bundle savedInstanceState){
         resultsRV.setLayoutManager(new LinearLayoutManager(getContext()));
-        final NewsAdapter newsAdapter = new NewsAdapter(requireActivity().getApplication());
+        final NewsAdapter newsAdapter = new NewsAdapter(this);
         NewsRepo.getInstance().searchResults.observe(getViewLifecycleOwner(), newsAdapter::setNewsList);
         resultsRV.setAdapter(newsAdapter);
         if(savedInstanceState != null){

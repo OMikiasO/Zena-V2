@@ -14,16 +14,6 @@ public class MyFragmentPagerAdapter extends androidx.fragment.app.FragmentPagerA
         this.fragments = fragments;
         this.titles = titles;
     }
-//    public MyFragmentPagerAdapter(FragmentManager fm, List<Fragment> fragments) {
-//        super(fm);
-//        this.fragments = fragments;
-//    }
-
-//    public void setTitles(List<String> titles){
-//        this.titles.clear();
-//        this.titles.addAll(titles);
-//        notifyDataSetChanged();
-//    }
 
     @Override
     public int getCount() {

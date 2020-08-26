@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,6 +17,7 @@ import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.play.core.tasks.Task;
 
 public class AppRater {
+    private static final String TAG = "AppRater";
     private final static String APP_TITLE = "ዜና | Zena";// App Name
     private final static String APP_PNAME = "com.chaosapps.zena";// Package Name
 
@@ -56,6 +58,7 @@ public class AppRater {
         Task<ReviewInfo> request = manager.requestReviewFlow();
         request.addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                Log.e(TAG, "REQUESTED");
                 // We can get the ReviewInfo object
                 ReviewInfo reviewInfo = task.getResult();
                 Task<Void> flow = manager.launchReviewFlow(activity, reviewInfo);

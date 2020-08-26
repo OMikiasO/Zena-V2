@@ -3,12 +3,25 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:statusBarColor">@color/colorAccent</item>
-<!--        <item name="android:windowLightStatusBar">true</item>-->
+        <item name="colorPrimary">@color/accentPrimary</item>
+        <item name="colorPrimaryDark">@color/accentPrimary</item>
+        <item name="colorAccent">@color/accentPrimary</item>
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:navigationBarColor">@android:color/white</item> <!--///////////-->
+        <item name="android:windowLightNavigationBar">true</item> <!--///////////-->
+        <item name="android:windowLightStatusBar">true</item> <!--///////////-->
+        <item name="android:windowBackground">@android:color/background_light</item>
+
 
     </style>
 
+
+    <style name="SplashTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accentPrimary</item>
+        <item name="colorPrimaryDark">@color/accentPrimary</item>
+        <item name="colorAccent">@color/accentPrimary</item>
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:navigationBarColor">@android:color/white</item> <!--///////////-->
+        <item name="android:windowBackground">@drawable/splash_bg</item>
+    </style>
 </resources>

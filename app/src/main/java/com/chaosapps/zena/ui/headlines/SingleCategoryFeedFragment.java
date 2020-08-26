@@ -86,7 +86,7 @@ public class SingleCategoryFeedFragment extends Fragment {
 
     private void setUpRecyclerView(Bundle savedInstanceState) {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        NewsAdapter newsAdapter = new NewsAdapter(requireActivity().getApplication());
+        NewsAdapter newsAdapter = new NewsAdapter(this);
         List<String> queries = (List<String>) (App.dynamicVariables.getValue().categories.get(key).get("queries"));
         if (!queries.isEmpty())
             NewsRepo.getInstance().fetchByCategory(false ,headlinesViewModel.liveDataMap.get(key), queries, 0, headlinesViewModel.loadingStatesMap.get(key),headlinesViewModel.hasLoadedAllItemsStatesMap.get(key),headlinesViewModel.refreshingStatesMap.get(key));

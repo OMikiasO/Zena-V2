@@ -68,7 +68,7 @@ public class FollowingFragment extends Fragment {
 
     private void setUpSavedNewsViews() {
         savedNewsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        NewsAdapter newsAdapter = new NewsAdapter(requireActivity().getApplication());
+        NewsAdapter newsAdapter = new NewsAdapter(this);
         NewsRepo.getInstance().savedNewsModels.observe(getViewLifecycleOwner(), newsModelList -> {
             Collections.reverse(newsModelList);
             if (newsModelList.isEmpty()) {
@@ -86,30 +86,13 @@ public class FollowingFragment extends Fragment {
             } else seeAllSavedTextView.setVisibility(View.GONE);
             newsAdapter.setNewsList(newsModelList);
         });
-//        FeedRepo.getInstance(getActivity().getApplication()).getSavedFeedElements().observe(getViewLifecycleOwner(), feedElementModels -> {
-//            Collections.reverse(feedElementModels);
-//            if (feedElementModels.isEmpty()) {
-//                noSavedNewsImageView.setVisibility(View.VISIBLE);
-//                noSavedNewsTextView.setVisibility(View.VISIBLE);
-//                savedNewsRecyclerView.setVisibility(View.GONE);
-//            } else {
-//                noSavedNewsImageView.setVisibility(View.GONE);
-//                noSavedNewsTextView.setVisibility(View.GONE);
-//                savedNewsRecyclerView.setVisibility(View.VISIBLE);
-//            }
-//            if (feedElementModels.size() > 2) {
-//                seeAllSavedTextView.setVisibility(View.VISIBLE);
-//                feedElementModels = feedElementModels.subList(0, 2);
-//            } else seeAllSavedTextView.setVisibility(View.GONE);
-//            feedAdapter.setFeedElementModelList(feedElementModels);
-//        });
         savedNewsRecyclerView.setAdapter(newsAdapter);
         seeAllSavedTextView.setOnClickListener(v -> Controller.getInstance().savedNewsFragment.setValue(true));
     }
 
     private void setUpSourcesViews() {
         sourcesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        SourceAdapter sourceAdapter = new SourceAdapter(requireActivity());
+        SourceAdapter sourceAdapter = new SourceAdapter(this);
         App.dynamicVariables.observe(getViewLifecycleOwner(), dynamicVariables -> {
             Map<String, String> sourcesMap = new HashMap<>();
             for (int i = 0; i < 3; i++) {

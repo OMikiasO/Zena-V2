@@ -37,29 +37,30 @@
                     android:id="@+id/searchImageView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="4dp"
                     android:foreground="?android:selectableItemBackground"
-                    android:padding="8dp"
-                    app:tint="@color/secondary"
+                    android:padding="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/search" />
+                    app:srcCompat="@drawable/search"
+                    app:tint="@color/secondary" />
 
                 <ImageView
                     android:id="@+id/feedSettingsImageView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="4dp"
                     android:clickable="true"
+                    android:contentDescription="Choose categories"
                     android:focusable="true"
                     android:foreground="?android:selectableItemBackgroundBorderless"
-                    android:padding="8dp"
-                    app:tint="@color/secondary"
+                    android:padding="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/feed_settings" />
+                    app:srcCompat="@drawable/feed_settings"
+                    app:tint="@color/secondary" />
 
                 <TextView
                     android:id="@+id/fragment_title_textView"

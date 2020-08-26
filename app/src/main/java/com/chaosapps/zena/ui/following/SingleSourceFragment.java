@@ -64,7 +64,7 @@ public class SingleSourceFragment extends Fragment {
 
     private void setUpRecyclerView(Bundle savedInstanceState){
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        NewsAdapter newsAdapter = new NewsAdapter(requireActivity().getApplication());
+        NewsAdapter newsAdapter = new NewsAdapter(this);
         NewsRepo.getInstance().newsModelsBySource.observe(getViewLifecycleOwner(), newsAdapter::setNewsList);
         recyclerView.setAdapter(newsAdapter);
         if(savedInstanceState != null){
