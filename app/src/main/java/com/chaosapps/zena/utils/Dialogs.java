@@ -16,26 +16,9 @@ public class Dialogs {
     private static final String TAG = "Dialogs";
 
     public static synchronized Dialogs getInstate(){
-        if(INSTANCE==null){
-            INSTANCE = new Dialogs();
-        }
+        if (INSTANCE == null) INSTANCE = new Dialogs();
         return INSTANCE;
     }
-
-//    public void feedSettingsWillBeLost(final Activity activity) {
-//        final androidx.appcompat.app.AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
-//        alertDialog.setCancelable(false);
-//
-//        alertDialog.setTitle("Your selection wont be saved");
-//        alertDialog.setMessage(message);
-//
-//
-//        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Okay", (dialog, which) -> dialog.dismiss());
-//        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Exit", (dialog, which) -> activity.finish());
-//
-//        alertDialog.show();
-//        alertDialog.getWindow().setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.fill_white_rounded_corner));
-//    }
 
     private AlertDialog loadingAlertDialog;
 
