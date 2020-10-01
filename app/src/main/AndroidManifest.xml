@@ -17,7 +17,7 @@
         android:theme="@style/SplashTheme">
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-5390928558813709~4465300602"/>
+            android:value="ca-app-pub-1449277214264730~6999977912"/>
         <activity
             android:name="com.chaosapps.zena.MainActivity"
             android:configChanges="uiMode"

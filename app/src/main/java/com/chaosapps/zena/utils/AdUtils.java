@@ -12,7 +12,7 @@ import com.google.android.gms.ads.MobileAds;
 public class AdUtils {
 
     private static final String TAG = "AdUtils";
-    private static final String AD_UNIT_ID = "ca-app-pub-5390928558813709/1664518072";
+    private static final String AD_UNIT_ID = "ca-app-pub-1449277214264730/2254917696";
     private static final String TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/8691691433";
 
     private static AdUtils INSTANCE;
@@ -35,7 +35,7 @@ public class AdUtils {
             });
 
             interstitialAd = new InterstitialAd(context);
-            interstitialAd.setAdUnitId(TEST_AD_UNIT_ID);
+            interstitialAd.setAdUnitId(AD_UNIT_ID);
             interstitialAd.loadAd(new AdRequest.Builder().addTestDevice("DDD36311860647F892E4518142E3C1AB").build());
             Controller.getInstance().detailsFragment.observeForever(aBoolean -> {
                 if(!App.dynamicVariables.getValue().showAds) return;
