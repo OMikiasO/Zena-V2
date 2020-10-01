@@ -47,12 +47,17 @@ public class SingleCategoryFeedFragment extends Fragment {
         return f;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        headlinesViewModel = ViewModelProviders.of(requireActivity()).get(HeadlinesViewModel.class);
+    }
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
         key = args.getString("key", "-1");
         pagePosition = args.getInt("pagePosition");
-        headlinesViewModel = ViewModelProviders.of(requireActivity()).get(HeadlinesViewModel.class);
         swipeRefreshLayout = new SwipeRefreshLayout(requireContext());
         recyclerView = new RecyclerView(requireContext());
         swipeRefreshLayout.addView(recyclerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -70,13 +75,18 @@ public class SingleCategoryFeedFragment extends Fragment {
             int headlinedClicked = Controller.getInstance().headlinesClicked.getValue();
             if(headlinedClicked>0 && currentPage==pagePosition && !recyclerViewIsSetUp) setUpRecyclerView(savedInstanceState);
         });
-        setUpViews();
+        headlinesViewModel.trigger.observe(getViewLifecycleOwner(), aBoolean -> {
+            if(aBoolean) setUpViews();
+        });
+
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         try { // surround this with try cause the recyclerView might not be setup yet.. since it is lazy setup
             savedInstanceState.putInt("position",((LinearLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition()); // get current recycle view position here.
+            savedInstanceState.putInt("singleCategoryFeed", 1);
+            Log.e(TAG, "SAVED INSATANVE");
         } catch (Exception e){
             Log.e(TAG, e.getMessage());
         }

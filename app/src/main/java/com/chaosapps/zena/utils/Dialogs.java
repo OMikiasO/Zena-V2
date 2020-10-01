@@ -23,21 +23,26 @@ public class Dialogs {
     private AlertDialog loadingAlertDialog;
 
     public void showLoadingDialog(final Activity activity, String title) {
-        loadingAlertDialog = new AlertDialog.Builder(activity).create();
-        final View view = activity.getLayoutInflater().inflate(R.layout.dialog_loading, null);
-        loadingAlertDialog.setCancelable(false);
+        try {
+            loadingAlertDialog = new AlertDialog.Builder(activity).create();
+            final View view = activity.getLayoutInflater().inflate(R.layout.dialog_loading, null);
+            loadingAlertDialog.setCancelable(false);
 
-        final TextView loadingDialogTextView = view.findViewById(R.id.loadingDialogTextView);
-        loadingDialogTextView.setText(title);
+            final TextView loadingDialogTextView = view.findViewById(R.id.loadingDialogTextView);
+            loadingDialogTextView.setText(title);
 
-        loadingAlertDialog.setView(view);
-        loadingAlertDialog.show();
-        loadingAlertDialog.getWindow().setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.fill_white_rounded_corner));
+            loadingAlertDialog.setView(view);
+            loadingAlertDialog.show();
+            loadingAlertDialog.getWindow().setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.fill_white_rounded_corner));
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     public void hideLoadingDialog() {
         try {
             loadingAlertDialog.dismiss();
+            loadingAlertDialog = null;
         } catch (Exception e) {
             Log.e(TAG, Objects.requireNonNull(e.getMessage()));
         }

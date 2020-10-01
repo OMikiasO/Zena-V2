@@ -65,188 +65,206 @@ public class NewsRepo {
     }
 
     public void fetchByCategory(boolean refresh, MutableLiveData<List<NewsModel>> liveData, List<String> queries, long lastPostedTime, MutableLiveData<Boolean> isLoading, MutableLiveData<Boolean> hasLoadedAllItems, MutableLiveData<Boolean> refreshing) {
-        if (refresh) refreshing.setValue(true);
-        else isLoading.setValue(true);
-        Query query;
-        Log.e(TAG, "QUERIES > " + queries.toString());
-        if (lastPostedTime != 0) {
-            query = FirebaseFirestore.getInstance().collection("News").whereIn("category", queries).orderBy("postedTime", Query.Direction.DESCENDING).startAfter(lastPostedTime).limit(10);
-        } else {
-            query = FirebaseFirestore.getInstance().collection("News").whereIn("category", queries).orderBy("postedTime", Query.Direction.DESCENDING).limit(10);
-        }
-        List<NewsModel> newsModels = liveData.getValue();
-        if (lastPostedTime == 0) {
-            query.get(Source.CACHE).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    if (!task.getResult().isEmpty()) {
-                        isLoading.setValue(false);
+        try {
+            if (refresh) refreshing.setValue(true);
+            else isLoading.setValue(true);
+            Query query;
+            Log.e(TAG, "QUERIES > " + queries.toString());
+            if (lastPostedTime != 0) {
+                query = FirebaseFirestore.getInstance().collection("News").whereIn("category", queries).orderBy("postedTime", Query.Direction.DESCENDING).startAfter(lastPostedTime).limit(10);
+            } else {
+                query = FirebaseFirestore.getInstance().collection("News").whereIn("category", queries).orderBy("postedTime", Query.Direction.DESCENDING).limit(10);
+            }
+            List<NewsModel> newsModels = liveData.getValue();
+            if (lastPostedTime == 0) {
+                query.get(Source.CACHE).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (!task.getResult().isEmpty()) {
+                            isLoading.setValue(false);
+                        }
+                        liveData.setValue(task.getResult().toObjects(NewsModel.class));
                     }
-                    liveData.setValue(task.getResult().toObjects(NewsModel.class));
-                }
+                    query.get().addOnCompleteListener(task1 -> {
+                        isLoading.setValue(false);
+                        refreshing.setValue(false);
+                        if (task1.isSuccessful()) {
+                            if (task1.getResult().size() % 10 != 0) hasLoadedAllItems.setValue(true);
+                            liveData.setValue(task1.getResult().toObjects(NewsModel.class));
+                        }
+                    });
+                });
+            } else {
                 query.get().addOnCompleteListener(task1 -> {
                     isLoading.setValue(false);
                     refreshing.setValue(false);
                     if (task1.isSuccessful()) {
                         if (task1.getResult().size() % 10 != 0) hasLoadedAllItems.setValue(true);
-                        liveData.setValue(task1.getResult().toObjects(NewsModel.class));
+                        newsModels.addAll(task1.getResult().toObjects(NewsModel.class));
+                        liveData.setValue(newsModels);
                     }
                 });
-            });
-        } else {
-            query.get().addOnCompleteListener(task1 -> {
-                isLoading.setValue(false);
-                refreshing.setValue(false);
-                if (task1.isSuccessful()) {
-                    if (task1.getResult().size() % 10 != 0) hasLoadedAllItems.setValue(true);
-                    newsModels.addAll(task1.getResult().toObjects(NewsModel.class));
-                    liveData.setValue(newsModels);
-                }
-            });
+            }
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
     }
 
     public void fetchBySource(boolean loadMore) {
-        String source = selectedSource.getValue();
-        if (source.isEmpty()) return;
-        Query query =  FirebaseFirestore.getInstance().collection("News")
-                .whereEqualTo("source", source).limit(15);
-        if(loadMore && lastSourceNewsDoc!=null){
-            query = query.startAfter(lastSourceNewsDoc);
-        } else {
-            newsModelsBySource.setValue(new ArrayList<>());
-        }
-        loadingNewsBySource.setValue(true);
-        query.get().addOnCompleteListener(task -> {
-            loadingNewsBySource.setValue(false);
-            if (task.isSuccessful()) {
-                if(task.getResult().size()>0)lastSourceNewsDoc = task.getResult().getDocuments().get(task.getResult().size()-1);
-                List<NewsModel> newsModels = newsModelsBySource.getValue();
-                newsModels.addAll(task.getResult().toObjects(NewsModel.class));
-                newsModelsBySource.setValue(newsModels);
+        try {
+            String source = selectedSource.getValue();
+            if (source.isEmpty()) return;
+            Query query = FirebaseFirestore.getInstance().collection("News")
+                    .whereEqualTo("source", source).limit(15);
+            if (loadMore && lastSourceNewsDoc != null) {
+                query = query.startAfter(lastSourceNewsDoc);
+            } else {
+                newsModelsBySource.setValue(new ArrayList<>());
             }
-        });
+            loadingNewsBySource.setValue(true);
+            query.get().addOnCompleteListener(task -> {
+                loadingNewsBySource.setValue(false);
+                if (task.isSuccessful()) {
+                    if (task.getResult().size() > 0)
+                        lastSourceNewsDoc = task.getResult().getDocuments().get(task.getResult().size() - 1);
+                    List<NewsModel> newsModels = newsModelsBySource.getValue();
+                    newsModels.addAll(task.getResult().toObjects(NewsModel.class));
+                    newsModelsBySource.setValue(newsModels);
+                }
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
 
     }
 
     private void fetchNewsById() {
-        selectedNewsId.observeForever(id -> {
-            selectedNewsModel.setValue(new NewsDetailsModel());
-            relatedNewsList.setValue(new ArrayList<>());
-            if (id.isEmpty()) return;
-            loadingRelatedNews.setValue(true);
-            DocumentReference documentReference = FirebaseFirestore.getInstance().document("NewsDetails/" + id);
+        try {
+            selectedNewsId.observeForever(id -> {
+                selectedNewsModel.setValue(new NewsDetailsModel());
+                relatedNewsList.setValue(new ArrayList<>());
+                if (id.isEmpty()) return;
+                loadingRelatedNews.setValue(true);
+                DocumentReference documentReference = FirebaseFirestore.getInstance().document("NewsDetails/" + id);
 
-            loadingNews.setValue(true);
-            failedToFetch.setValue(false);
-            documentReference.get().addOnCompleteListener(task -> {
+                loadingNews.setValue(true);
+                failedToFetch.setValue(false);
+                documentReference.get().addOnCompleteListener(task -> {
 
-                loadingNews.setValue(false);
-                if (task.isSuccessful()) {
+                    loadingNews.setValue(false);
+                    if (task.isSuccessful()) {
 //                    selectedNewsModel.setValue(null);
-                    if(selectedNewsId.getValue().equals(task.getResult().toObject(NewsDetailsModel.class).getId())){
-                        selectedNewsModel.setValue(task.getResult().toObject(NewsDetailsModel.class));
+                        if (selectedNewsId.getValue().equals(task.getResult().toObject(NewsDetailsModel.class).getId())) {
+                            selectedNewsModel.setValue(task.getResult().toObject(NewsDetailsModel.class));
+                        }
+                    } else {
+                        failedToFetch.setValue(true);
                     }
-                } else {
-                    failedToFetch.setValue(true);
-                }
+                });
             });
-        });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void fetchRelatedNews() {
-        selectedNewsModel.observeForever(newsModel -> {
-            if (newsModel.getBody().isEmpty() && relatedNewsList.getValue().size()!=0) return;
-            Query query = FirebaseFirestore.getInstance()
-                    .collection("News")
-                    .whereEqualTo("category", newsModel.getCategory())
-                    .whereEqualTo("source", newsModel.getSource())
-                    .limit(3);
-            failedToFetchRelatedNews.setValue(false);
-            query.get().addOnCompleteListener(task -> {
-                loadingRelatedNews.setValue(false);
-                if (task.isSuccessful()) {
-                    List<NewsModel> newsModels = task.getResult().toObjects(NewsModel.class);
-                    for (int i = 0; i < newsModels.size(); i++) {
-                        if (newsModels.get(i).getId().equals(newsModel.getId())) {
-                            newsModels.remove(i);
+        try {
+            selectedNewsModel.observeForever(newsModel -> {
+                if (newsModel.getBody().isEmpty() && relatedNewsList.getValue().size() != 0) return;
+                Query query = FirebaseFirestore.getInstance()
+                        .collection("News")
+                        .whereEqualTo("category", newsModel.getCategory())
+                        .whereEqualTo("source", newsModel.getSource())
+                        .limit(3);
+                failedToFetchRelatedNews.setValue(false);
+                query.get().addOnCompleteListener(task -> {
+                    loadingRelatedNews.setValue(false);
+                    if (task.isSuccessful()) {
+                        List<NewsModel> newsModels = task.getResult().toObjects(NewsModel.class);
+                        for (int i = 0; i < newsModels.size(); i++) {
+                            if (newsModels.get(i).getId().equals(newsModel.getId())) {
+                                newsModels.remove(i);
+                            }
                         }
-                    }
-                    newsModels.remove(newsModel);
-                    Log.e(TAG, newsModels.size()+" - - - - - - - - - -");
-                    if(newsModels.size()<=3)relatedNewsList.setValue(newsModels);
+                        newsModels.remove(newsModel);
+                        Log.e(TAG, newsModels.size() + " - - - - - - - - - -");
+                        if (newsModels.size() <= 3) relatedNewsList.setValue(newsModels);
 
-                } else {
-                    failedToFetchRelatedNews.setValue(true);
-                }
+                    } else {
+                        failedToFetchRelatedNews.setValue(true);
+                    }
+                });
             });
-        });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     public void createSuggestions(String query) {
-        //required vars
-        loadingSuggestions.setValue(false);
-        query = Utils.getInstance().removeSpecialCharacters(query);
-        if (query.isEmpty()) return;
-
-        loadingSuggestions.setValue(true);
-        query = query.toUpperCase();
-
-        Query q = FirebaseFirestore.getInstance().collection("NewsDetails").whereEqualTo("searchKeyWords." + query, true);
-        q.limit(5).get().addOnCompleteListener(task -> {
+        try {
+            //required vars
             loadingSuggestions.setValue(false);
-            if (task.isSuccessful()) {
-                List<NewsModel> newsModels = task.getResult().toObjects(NewsModel.class);
-                ArrayList<String> suggestionList = new ArrayList<>();
-                for (int i = 0; i < newsModels.size(); i++) {
-                    String suggestion = newsModels.get(i).getTitle();
-                    suggestionList.add(suggestion);
+            query = Utils.getInstance().removeSpecialCharacters(query);
+            if (query.isEmpty()) return;
+
+            loadingSuggestions.setValue(true);
+            query = query.toUpperCase();
+
+            Query q = FirebaseFirestore.getInstance().collection("NewsDetails").whereEqualTo("searchKeyWords." + query, true);
+            q.limit(5).get().addOnCompleteListener(task -> {
+                loadingSuggestions.setValue(false);
+                if (task.isSuccessful()) {
+                    List<NewsModel> newsModels = task.getResult().toObjects(NewsModel.class);
+                    ArrayList<String> suggestionList = new ArrayList<>();
+                    for (int i = 0; i < newsModels.size(); i++) {
+                        String suggestion = newsModels.get(i).getTitle();
+                        suggestionList.add(suggestion);
+                    }
+                    searchSuggestions.setValue(suggestionList);
                 }
-                searchSuggestions.setValue(suggestionList);
-            }
-        });
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     public void searchNews(String query) {
-        String searchTerm = query;
-        query = Utils.getInstance().removeSpecialCharacters(query);
-        //required vars
-
-        loadingSuggestions.setValue(false);
-        loadingSearchResult.setValue(false);
-        Set<String> searchQueries = new HashSet<>();
-//        Set<String> savedSearchQueries = new HashSet<>(Account.getInstance().userSharedPref.getStringSet("searchQueries", new HashSet<>()));
-
-//        searchQueries.addAll(savedSearchQueries);
-
-        searchQueries.add(query);
-//        savedSearchSuggestions.setValue(new ArrayList<>(searchQueries)); // This updates teh list of the saved suggestion when search screen is empty.
-//        Account.getInstance().userSharedPref.edit().putStringSet("searchQueries", searchQueries).apply();
-        query = query.trim();
-        if (query.isEmpty()) return;
-        query = query.toUpperCase();
-        String[] queries = query.trim().split(" ");
-
-        loadingSearchResult.setValue(true);
-        Query q = FirebaseFirestore.getInstance().collection("NewsDetails").limit(5);
-        Log.e(TAG, q.toString());
-        for (String s : queries) {
-            q = q.whereEqualTo("searchKeyWords." + s, true);
-        }
-
-        q.get().addOnCompleteListener(task -> {
+        try {
+            String searchTerm = query;
+            query = Utils.getInstance().removeSpecialCharacters(query);
+            loadingSuggestions.setValue(false);
             loadingSearchResult.setValue(false);
-            if (task.isSuccessful()) {
-                List<NewsModel> newsModels = task.getResult().toObjects(NewsModel.class);
-                if (newsModels.isEmpty()) noSearchResultFound.setValue(true);
-                else {
-                    noSearchResultFound.setValue(false);
-                    CacheUtils.getInstance().saveSearchTerm(searchTerm);
-                }
-                searchResults.setValue(task.getResult().toObjects(NewsModel.class));
-            } else {
-                Log.e(TAG, task.getException().getMessage());
+            Set<String> searchQueries = new HashSet<>();
+
+            searchQueries.add(query);
+            query = query.trim();
+            if (query.isEmpty()) return;
+            query = query.toUpperCase();
+            String[] queries = query.trim().split(" ");
+
+            loadingSearchResult.setValue(true);
+            Query q = FirebaseFirestore.getInstance().collection("NewsDetails").limit(5);
+            Log.e(TAG, q.toString());
+            for (String s : queries) {
+                q = q.whereEqualTo("searchKeyWords." + s, true);
             }
-        });
+
+            q.get().addOnCompleteListener(task -> {
+                loadingSearchResult.setValue(false);
+                if (task.isSuccessful()) {
+                    List<NewsModel> newsModels = task.getResult().toObjects(NewsModel.class);
+                    if (newsModels.isEmpty()) noSearchResultFound.setValue(true);
+                    else {
+                        noSearchResultFound.setValue(false);
+                        CacheUtils.getInstance().saveSearchTerm(searchTerm);
+                    }
+                    searchResults.setValue(task.getResult().toObjects(NewsModel.class));
+                } else {
+                    Log.e(TAG, task.getException().getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     public void fetchNewsForMainFeed(Context context,boolean loadMore) {
@@ -296,19 +314,23 @@ public class NewsRepo {
     }
 
     private void fetchSavedNewsDetailsFromCache() {
-        CacheUtils.getInstance().savedNewsIds.observeForever(strings -> {
-            List<NewsModel> saved = new ArrayList<>();
-            for (int i = 0; i < strings.size(); i++) {
-                String newsId = strings.get(i);
-                FirebaseFirestore.getInstance().document("News/" + newsId).get(Source.CACHE)
-                        .addOnSuccessListener(task -> {
-                            NewsModel newsModel = task.toObject(NewsModel.class);
-                            newsModel.setNewsType(NewsModel.SMALL_NEWS_ITEM);
-                            saved.add(newsModel);
-                            savedNewsModels.setValue(saved);
-                        });
-            }
-        });
+        try {
+            CacheUtils.getInstance().savedNewsIds.observeForever(strings -> {
+                List<NewsModel> saved = new ArrayList<>();
+                for (int i = 0; i < strings.size(); i++) {
+                    String newsId = strings.get(i);
+                    FirebaseFirestore.getInstance().document("News/" + newsId).get(Source.CACHE)
+                            .addOnSuccessListener(task -> {
+                                NewsModel newsModel = task.toObject(NewsModel.class);
+                                newsModel.setNewsType(NewsModel.SMALL_NEWS_ITEM);
+                                saved.add(newsModel);
+                                savedNewsModels.setValue(saved);
+                            });
+                }
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
 }

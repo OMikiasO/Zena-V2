@@ -77,29 +77,37 @@ public class DetailsFragment extends Fragment {
     }
 
     private void synchronizer(Context context) {
-        NewsRepo.getInstance().loadingNews.observe(getViewLifecycleOwner(), aBoolean -> detailsViewModel.updateViewItems(context));
+        try {
+            NewsRepo.getInstance().loadingNews.observe(getViewLifecycleOwner(), aBoolean -> detailsViewModel.updateViewItems(context));
 
-        NewsRepo.getInstance().failedToFetch.observe(getViewLifecycleOwner(), aBoolean -> detailsViewModel.updateViewItems(context));
+            NewsRepo.getInstance().failedToFetch.observe(getViewLifecycleOwner(), aBoolean -> detailsViewModel.updateViewItems(context));
 
-        NewsRepo.getInstance().selectedNewsModel.observe(getViewLifecycleOwner(), newsModel -> detailsViewModel.updateViewItems(context));
+            NewsRepo.getInstance().selectedNewsModel.observe(getViewLifecycleOwner(), newsModel -> detailsViewModel.updateViewItems(context));
 
-        CacheUtils.getInstance().savedNewsIds.observe(getViewLifecycleOwner(), strings -> detailsViewModel.updateViewItems(context));
+            CacheUtils.getInstance().savedNewsIds.observe(getViewLifecycleOwner(), strings -> detailsViewModel.updateViewItems(context));
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpViews() {
-        actionBarIV.setOnClickListener(v -> Controller.getInstance().detailsFragment.setValue(false));
-        detailsViewModel.progressBarVisibility.observe(getViewLifecycleOwner(), progressBar::setVisibility);
-        detailsViewModel.errorStateVisibility.observe(getViewLifecycleOwner(), errorStateCL::setVisibility);
-        retryBtn.setOnClickListener(v -> {
-            NewsRepo.getInstance().selectedNewsId.setValue(NewsRepo.getInstance().selectedNewsId.getValue());
-        });
-        shareImageView.setOnClickListener(v -> Utils.getInstance().share(requireContext(), NewsRepo.getInstance().selectedNewsModel.getValue().getLink()));
-        visitWebsiteImageView.setOnClickListener(v -> Utils.getInstance().openLink(requireContext(), NewsRepo.getInstance().selectedNewsModel.getValue().getLink()));
+        try {
+            actionBarIV.setOnClickListener(v -> Controller.getInstance().detailsFragment.setValue(false));
+            detailsViewModel.progressBarVisibility.observe(getViewLifecycleOwner(), progressBar::setVisibility);
+            detailsViewModel.errorStateVisibility.observe(getViewLifecycleOwner(), errorStateCL::setVisibility);
+            retryBtn.setOnClickListener(v -> {
+                NewsRepo.getInstance().selectedNewsId.setValue(NewsRepo.getInstance().selectedNewsId.getValue());
+            });
+            shareImageView.setOnClickListener(v -> Utils.getInstance().share(requireContext(), NewsRepo.getInstance().selectedNewsModel.getValue().getLink()));
+            visitWebsiteImageView.setOnClickListener(v -> Utils.getInstance().openLink(requireContext(), NewsRepo.getInstance().selectedNewsModel.getValue().getLink()));
 
-        detailsViewModel.saveImageSourceId.observe(getViewLifecycleOwner(), resourceId -> saveImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), resourceId)));
+            detailsViewModel.saveImageSourceId.observe(getViewLifecycleOwner(), resourceId -> saveImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), resourceId)));
 
-        detailsViewModel.saveImageColor.observe(getViewLifecycleOwner(), colorId -> saveImageView.setColorFilter(ContextCompat.getColor(requireContext(), colorId)));
-        detailsViewModel.onSaveClickListener.observe(getViewLifecycleOwner(), saveImageView::setOnClickListener);
+            detailsViewModel.saveImageColor.observe(getViewLifecycleOwner(), colorId -> saveImageView.setColorFilter(ContextCompat.getColor(requireContext(), colorId)));
+            detailsViewModel.onSaveClickListener.observe(getViewLifecycleOwner(), saveImageView::setOnClickListener);
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     @Override
@@ -109,24 +117,32 @@ public class DetailsFragment extends Fragment {
     }
 
     private void setUpRecyclerView(Bundle savedInstanceState) {
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setVerticalScrollBarEnabled(false);
-        DetailsAdapter detailsAdapter = new DetailsAdapter(this);
-        NewsRepo.getInstance().selectedNewsModel.observe(getViewLifecycleOwner(), newsDetailsModel -> {
-            if (!newsDetailsModel.getBody().isEmpty()) detailsAdapter.setNews(newsDetailsModel);
-        });
-        recyclerView.setAdapter(detailsAdapter);
-        if (savedInstanceState != null) {
-            recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
+        try {
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            recyclerView.setVerticalScrollBarEnabled(false);
+            DetailsAdapter detailsAdapter = new DetailsAdapter(this);
+            NewsRepo.getInstance().selectedNewsModel.observe(getViewLifecycleOwner(), newsDetailsModel -> {
+                if (!newsDetailsModel.getBody().isEmpty()) detailsAdapter.setNews(newsDetailsModel);
+            });
+            recyclerView.setAdapter(detailsAdapter);
+            if (savedInstanceState != null) {
+                recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
+            }
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
     }
 
     private void linkWithController() {
-        Controller.getInstance().detailsFragment.observe(getViewLifecycleOwner(), aBoolean -> {
-            if (!aBoolean) {
-                clearPlayer.setValue(true);
-                getParentFragmentManager().beginTransaction().remove(DetailsFragment.this).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-            }
-        });
+        try {
+            Controller.getInstance().detailsFragment.observe(getViewLifecycleOwner(), aBoolean -> {
+                if (!aBoolean) {
+                    clearPlayer.setValue(true);
+                    getParentFragmentManager().beginTransaction().remove(DetailsFragment.this).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+                }
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 }

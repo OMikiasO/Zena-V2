@@ -27,41 +27,45 @@ public class AdUtils {
     }
 
     public void initAds(Context context) {
-        if(!App.dynamicVariables.getValue().showAds) return;
-        MobileAds.initialize(context, initializationStatus -> {
-            adsInitialized=true;
-            Log.e(TAG, "ADs initialized");
-        });
+        try {
+            if (!App.dynamicVariables.getValue().showAds) return;
+            MobileAds.initialize(context, initializationStatus -> {
+                adsInitialized = true;
+                Log.e(TAG, "ADs initialized");
+            });
 
-        interstitialAd = new InterstitialAd(context);
-        interstitialAd.setAdUnitId(TEST_AD_UNIT_ID);
-        interstitialAd.loadAd(new AdRequest.Builder().addTestDevice("DDD36311860647F892E4518142E3C1AB").build());
-        Controller.getInstance().detailsFragment.observeForever(aBoolean -> {
-            if(!App.dynamicVariables.getValue().showAds) return;
-            if (aBoolean) {
-                if (interstitialAd.isLoaded()) {
-                    if (noOfNewsSeen % App.dynamicVariables.getValue().gapBetweenAds == 0) interstitialAd.show();
+            interstitialAd = new InterstitialAd(context);
+            interstitialAd.setAdUnitId(TEST_AD_UNIT_ID);
+            interstitialAd.loadAd(new AdRequest.Builder().addTestDevice("DDD36311860647F892E4518142E3C1AB").build());
+            Controller.getInstance().detailsFragment.observeForever(aBoolean -> {
+                if(!App.dynamicVariables.getValue().showAds) return;
+                if (aBoolean) {
+                    if (interstitialAd.isLoaded()) {
+                        if (noOfNewsSeen % App.dynamicVariables.getValue().gapBetweenAds == 0) interstitialAd.show();
+                    } else {
+                        interstitialAd.loadAd(new AdRequest.Builder().addTestDevice("DDD36311860647F892E4518142E3C1AB").build());
+                    }
+                    noOfNewsSeen++;
                 } else {
-                    interstitialAd.loadAd(new AdRequest.Builder().addTestDevice("DDD36311860647F892E4518142E3C1AB").build());
+                    if (!interstitialAd.isLoaded()) {
+                        interstitialAd.loadAd(new AdRequest.Builder().addTestDevice("DDD36311860647F892E4518142E3C1AB").build());
+                    }
                 }
-                noOfNewsSeen++;
-            } else {
-                if (!interstitialAd.isLoaded()) {
-                    interstitialAd.loadAd(new AdRequest.Builder().addTestDevice("DDD36311860647F892E4518142E3C1AB").build());
-                }
-            }
-        });
+            });
 
 
-        interstitialAd.setAdListener(new AdListener(){
-            @Override
-            public void onAdOpened() {
-                super.onAdOpened();
-                PlayerUtils.getInstance().auto_play = false;
-                if(PlayerUtils.getInstance().isPlaying.getValue()){
-                    PlayerUtils.getInstance().player.setPlayWhenReady(false);
+            interstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdOpened() {
+                    super.onAdOpened();
+                    PlayerUtils.getInstance().auto_play = false;
+                    if (PlayerUtils.getInstance().isPlaying.getValue()) {
+                        PlayerUtils.getInstance().player.setPlayWhenReady(false);
+                    }
                 }
-            }
-        });
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 }

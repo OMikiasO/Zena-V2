@@ -14,11 +14,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.material.tabs.TabLayout;
 import com.chaosapps.zena.App;
 import com.chaosapps.zena.R;
 import com.chaosapps.zena.adapter.MyFragmentPagerAdapter;
 import com.chaosapps.zena.utils.Controller;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +41,6 @@ public class HeadlinesFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        headlinesViewModel = ViewModelProviders.of(requireActivity()).get(HeadlinesViewModel.class);
         return inflater.inflate(R.layout.fragment_hedlines, container, false);
     }
 
@@ -50,6 +49,14 @@ public class HeadlinesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         allFindViewByIds(view);
         synchronizer();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        headlinesViewModel = ViewModelProviders.of(requireActivity()).get(HeadlinesViewModel.class);
+        if(savedInstanceState!=null) headlinesViewModel.skipper = 0;
     }
 
     private void synchronizer(){

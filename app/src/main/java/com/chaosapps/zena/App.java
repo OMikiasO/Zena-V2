@@ -15,6 +15,8 @@ import com.chaosapps.zena.utils.Account;
 import com.chaosapps.zena.utils.CacheUtils;
 import com.chaosapps.zena.utils.ConnectionUtils;
 import com.chaosapps.zena.utils.Controller;
+import com.chaosapps.zena.utils.PlayerUtils;
+import com.chaosapps.zena.utils.Utils;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Source;
@@ -27,15 +29,13 @@ public class App extends Application {
     public static final String TAG = "App";
 
     public static final String CHANNEL_1_ID = "channel1";
-    public static final String CHANNEL_2_ID = "channel2";
-
     public static MutableLiveData<DynamicVariables> dynamicVariables = new MutableLiveData<>(new DynamicVariables());
 
 
     @Override
     public void onCreate() {
         fetchDynamicVariables();
-        setUpTheme();
+        syncSettings();
         super.onCreate();
         createNotificationChannels();
         CacheUtils.getInstance().userSharedPref = this.getSharedPreferences(CacheUtils.USER_PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
@@ -45,19 +45,26 @@ public class App extends Application {
         Account.getInstance().syncUserData(this);
     }
 
-    private void setUpTheme() {
-        String darkTheme = PreferenceManager.getDefaultSharedPreferences(this).getString("dark_theme", "3");
-        switch (darkTheme) {
-            case "1":
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                break;
-            case "2":
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                break;
-            case "3":
-            default:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                break;
+    private void syncSettings() {
+        try {
+            String darkTheme = PreferenceManager.getDefaultSharedPreferences(this).getString("dark_theme", "3");
+            switch (darkTheme) {
+                case "1":
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    break;
+                case "2":
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    break;
+                case "3":
+                default:
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                    break;
+            }
+
+            boolean audioAutoPlay = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("auto_play_audio", true);
+            PlayerUtils.getInstance().auto_play = audioAutoPlay;
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
     }
 
@@ -67,27 +74,30 @@ public class App extends Application {
     }
 
     public void fetchDynamicVariables() {
+        try {
+            DocumentReference dynamicVariablesDocRef = FirebaseFirestore.getInstance().document("Public Files/dynamicVariables");
+            dynamicVariablesDocRef.get(Source.CACHE).addOnCompleteListener(task -> {
 
-        DocumentReference dynamicVariablesDocRef = FirebaseFirestore.getInstance().document("Public Files/dynamicVariables");
-        dynamicVariablesDocRef.get(Source.CACHE).addOnCompleteListener(task -> {
-
-            if (task.isSuccessful()){
-                dynamicVariables.setValue(task.getResult().toObject(DynamicVariables.class));
-            } else {
-                Log.e(TAG, task.getException().getMessage());
-                if(!ConnectionUtils.isConnected(this)){
-                    Controller.getInstance().noInternet.setValue(true);
-                    return;
+                if (task.isSuccessful()) {
+                    dynamicVariables.setValue(task.getResult().toObject(DynamicVariables.class));
+                } else {
+                    Log.e(TAG, task.getException().getMessage());
+                    if (!ConnectionUtils.isConnected(this)) {
+                        Controller.getInstance().noInternet.setValue(true);
+                        return;
+                    }
                 }
-            }
 
-            dynamicVariablesDocRef.get().addOnCompleteListener(task1 -> {
-                if (task1.isSuccessful())
-                    dynamicVariables.setValue(task1.getResult().toObject(DynamicVariables.class));
-                else Log.e(TAG, task1.getException().getMessage());
+                dynamicVariablesDocRef.get().addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful())
+                        dynamicVariables.setValue(task1.getResult().toObject(DynamicVariables.class));
+                    else Log.e(TAG, task1.getException().getMessage());
 
+                });
             });
-        });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     public static class DynamicVariables {
@@ -105,15 +115,19 @@ public class App extends Application {
     }
 
     private void createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel1 = new NotificationChannel(
-                    CHANNEL_1_ID,
-                    "News notification",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            channel1.setDescription("This is Channel 1");
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel1);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel1 = new NotificationChannel(
+                        CHANNEL_1_ID,
+                        "News notification",
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+                channel1.setDescription("This is Channel 1");
+                NotificationManager manager = getSystemService(NotificationManager.class);
+                manager.createNotificationChannel(channel1);
+            }
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
     }
 }

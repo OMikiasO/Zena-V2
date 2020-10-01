@@ -43,56 +43,63 @@ public class PlayerUtils {
     }
 
     private String currentUrl;
-    private int skipper = 0;
     public MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(false);
     public MutableLiveData<NewsDetailsModel> currentlyPlayingNewsModel = new MutableLiveData<>();
     public MutableLiveData<Integer> position = new MutableLiveData<>(0);
 
     public void initMediaPlayer(Activity activity, NewsDetailsModel newsDetailsModel) {
-        currentlyPlayingNewsModel.setValue(newsDetailsModel);
-        if (newsDetailsModel.getAudio().equals(currentUrl)) {
-            if (player != null) return;
-        } else {
-            if (player != null) player.release();
+        try {
+            currentlyPlayingNewsModel.setValue(newsDetailsModel);
+            if (newsDetailsModel.getAudio().equals(currentUrl)) {
+                if (player != null) return;
+            } else {
+                if (player != null) player.release();
+            }
+
+            RenderersFactory renderersFactory = new DefaultRenderersFactory(activity);
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
+            LoadControl loadControl = new DefaultLoadControl();
+
+            player = ExoPlayerFactory.newSimpleInstance(activity, renderersFactory, trackSelector, loadControl);
+
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(activity, "ExoplayerDemo");
+            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+            Handler mainHandler = new Handler();
+            MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(newsDetailsModel.getAudio()),
+                    dataSourceFactory,
+                    extractorsFactory,
+                    mainHandler,
+                    null);
+
+            player.prepare(mediaSource);
+            player.setPlayWhenReady(auto_play);
+            addListeners();
+            currentUrl = newsDetailsModel.getAudio();
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
-
-        RenderersFactory renderersFactory = new DefaultRenderersFactory(activity);
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
-        LoadControl loadControl = new DefaultLoadControl();
-
-        player = ExoPlayerFactory.newSimpleInstance(activity, renderersFactory, trackSelector, loadControl);
-
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(activity, "ExoplayerDemo");
-        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-        Handler mainHandler = new Handler();
-        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(newsDetailsModel.getAudio()),
-                dataSourceFactory,
-                extractorsFactory,
-                mainHandler,
-                null);
-
-        player.prepare(mediaSource);
-        player.setPlayWhenReady(auto_play);
-        addListeners();
-        currentUrl = newsDetailsModel.getAudio();
     }
 
     private void addListeners() {
-        player.addListener(new Player.EventListener() {
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                Log.e(TAG, "Player state changed");
-                Log.e(TAG,  (playbackState == PlaybackState.STATE_STOPPED) +"");
-                if (playbackState == PlaybackState.STATE_STOPPED) {
-                    isPlaying.setValue(false);
-                    currentUrl = "";
-                } else {
-                    isPlaying.setValue(true);
+        try {
+            player.addListener(new Player.EventListener() {
+                @Override
+                public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                    Log.e(TAG, "Player state changed");
+                    Log.e(TAG, (playbackState == PlaybackState.STATE_STOPPED) + "");
+                    if (playbackState == PlaybackState.STATE_STOPPED) {
+                        isPlaying.setValue(false);
+                        currentUrl = "";
+                    } else {
+                        isPlaying.setValue(true);
+                    }
                 }
-            }
-        });
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     public SimpleExoPlayer player;

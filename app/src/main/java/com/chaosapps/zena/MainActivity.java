@@ -34,6 +34,7 @@ import com.chaosapps.zena.utils.PlayerUtils;
 import com.chaosapps.zena.utils.Singletons;
 import com.chaosapps.zena.utils.Utils;
 import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Map;
 import java.util.Objects;
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         setUpCustomNavView(savedInstanceState);
         setUpMiniPlayer();
         setUpNoInternetCL();
-
+        FirebaseMessaging.getInstance().subscribeToTopic("all");
         AppRater.app_launched(this);
     }
 
@@ -98,82 +99,87 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpFragments(Bundle savedInstanceState) {
-        fragmentForYou = fm.findFragmentByTag("1");
-        if (fragmentForYou == null) {
-            fragmentForYou = new ForYouFragment();
-            fm.beginTransaction().add(R.id.nav_host_fragment, fragmentForYou, "1").setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-        }
-
-        fragmentHeadlines = fm.findFragmentByTag("2");
-        if (fragmentHeadlines == null) {
-            fragmentHeadlines = new HeadlinesFragment();
-            fm.beginTransaction().add(R.id.nav_host_fragment, fragmentHeadlines, "2").hide(fragmentHeadlines).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-        }
-
-        fragmentFollowing = fm.findFragmentByTag("3");
-        if (fragmentFollowing == null) {
-            fragmentFollowing = new FollowingFragment();
-            fm.beginTransaction().add(R.id.nav_host_fragment, fragmentFollowing, "3").hide(fragmentFollowing).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-        }
-
-        fragmentMore = fm.findFragmentByTag("4");
-        if (fragmentMore == null) {
-            fragmentMore = new MoreFragment();
-            fm.beginTransaction().add(R.id.nav_host_fragment, fragmentMore, "4")
-                    .hide(fragmentMore).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .commit();
-        }
-
-        if (savedInstanceState != null) {
-            Log.e(getClass().getSimpleName(), savedInstanceState.toString());
-            active = fm.findFragmentByTag(savedInstanceState.getString("activeTag"));
-            if (active == null) active = fragmentForYou;
-        } else {
-            active = fragmentForYou;
-        }
-
-        Controller.getInstance().detailsFragment.observe(this, aBoolean -> {
-            if (aBoolean) {
-                Fragment fragment = new DetailsFragment();
-                final FragmentManager fm = getSupportFragmentManager();
-                fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+        try {
+            fragmentForYou = fm.findFragmentByTag("1");
+            if (fragmentForYou == null) {
+                fragmentForYou = new ForYouFragment();
+                fm.beginTransaction().add(R.id.nav_host_fragment, fragmentForYou, "1").setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
             }
-        });
 
-        Controller.getInstance().searchFragment.observe(this, aBoolean -> {
-            if (aBoolean) {
-                Fragment fragment = new SearchFragment();
-                final FragmentManager fm = getSupportFragmentManager();
-                fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+            fragmentHeadlines = fm.findFragmentByTag("2");
+            if (fragmentHeadlines == null) {
+                fragmentHeadlines = new HeadlinesFragment();
+                fm.beginTransaction().add(R.id.nav_host_fragment, fragmentHeadlines, "2").hide(fragmentHeadlines).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
             }
-        });
 
-        Controller.getInstance().sourcesFragment.observe(this, aBoolean -> {
-            if (aBoolean) {
-                Fragment fragment = new SourcesFragment();
-                final FragmentManager fm = getSupportFragmentManager();
-                fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+            fragmentFollowing = fm.findFragmentByTag("3");
+            if (fragmentFollowing == null) {
+                fragmentFollowing = new FollowingFragment();
+                fm.beginTransaction().add(R.id.nav_host_fragment, fragmentFollowing, "3").hide(fragmentFollowing).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
             }
-        });
 
-        Controller.getInstance().singleSourceFragment.observe(this, aBoolean -> {
-            if (aBoolean) {
-                Fragment fragment = new SingleSourceFragment();
-                final FragmentManager fm = getSupportFragmentManager();
-                fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+            fragmentMore = fm.findFragmentByTag("4");
+            if (fragmentMore == null) {
+                fragmentMore = new MoreFragment();
+                fm.beginTransaction().add(R.id.nav_host_fragment, fragmentMore, "4")
+                        .hide(fragmentMore).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .commit();
             }
-        });
 
-        Controller.getInstance().savedNewsFragment.observe(this, aBoolean -> {
-            if (aBoolean) {
-                Fragment fragment = new SavedNewsFragment();
-                final FragmentManager fm = getSupportFragmentManager();
-                fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+            if (savedInstanceState != null) {
+                Log.e(getClass().getSimpleName(), savedInstanceState.toString());
+                active = fm.findFragmentByTag(savedInstanceState.getString("activeTag"));
+                if (active == null) active = fragmentForYou;
+            } else {
+                active = fragmentForYou;
             }
-        });
+
+            Controller.getInstance().detailsFragment.observe(this, aBoolean -> {
+                if (aBoolean) {
+                    Fragment fragment = new DetailsFragment();
+                    final FragmentManager fm = getSupportFragmentManager();
+                    fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+                }
+            });
+
+            Controller.getInstance().searchFragment.observe(this, aBoolean -> {
+                if (aBoolean) {
+                    Fragment fragment = new SearchFragment();
+                    final FragmentManager fm = getSupportFragmentManager();
+                    fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+                }
+            });
+
+            Controller.getInstance().sourcesFragment.observe(this, aBoolean -> {
+                if (aBoolean) {
+                    Fragment fragment = new SourcesFragment();
+                    final FragmentManager fm = getSupportFragmentManager();
+                    fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+                }
+            });
+
+            Controller.getInstance().singleSourceFragment.observe(this, aBoolean -> {
+                if (aBoolean) {
+                    Fragment fragment = new SingleSourceFragment();
+                    final FragmentManager fm = getSupportFragmentManager();
+                    fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+                }
+            });
+
+            Controller.getInstance().savedNewsFragment.observe(this, aBoolean -> {
+                if (aBoolean) {
+                    Fragment fragment = new SavedNewsFragment();
+                    final FragmentManager fm = getSupportFragmentManager();
+                    fm.beginTransaction().add(R.id.details_fragment_host, fragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).commit();
+                }
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpCustomNavView(Bundle savedInstanceState) {
+        try{
         final int[] lastSelectedItemId = new int[1];
         if (savedInstanceState == null) {
             lastSelectedItemId[0] = R.id.forYouCL;
@@ -257,10 +263,13 @@ public class MainActivity extends AppCompatActivity {
                     moreCL.performClick();
                     break;
             }
-        });
+        });} catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpMiniPlayer() {
+        try{
         //subView inits
         PlayerControlView playerControlView = miniPlayerCardView.findViewById(R.id.playerView);
         TextView sourceTextView = miniPlayerCardView.findViewById(R.id.sourceTextView);
@@ -311,10 +320,13 @@ public class MainActivity extends AppCompatActivity {
             if(newsDetailsModel.getAudio()!=null){
                 PlayerUtils.getInstance().initMediaPlayer(this, newsDetailsModel);
             }
-        });
+        });} catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpNoInternetCL(){
+        try{
         Controller.getInstance().noInternet.observe(this, aBoolean -> {
             if(aBoolean) noInternetCL.setVisibility(VISIBLE);
             else noInternetCL.setVisibility(GONE);
@@ -325,11 +337,14 @@ public class MainActivity extends AppCompatActivity {
                 Controller.getInstance().noInternet.setValue(false);
                 this.getApplication().onCreate();
             }
-        });
+        });} catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     @Override
     public void onBackPressed() {
+        try{
         if (Controller.getInstance().detailsFragment.getValue()) {
             Controller.getInstance().detailsFragment.setValue(false);
         } else if (Controller.getInstance().singleSourceFragment.getValue()) {
@@ -347,6 +362,8 @@ public class MainActivity extends AppCompatActivity {
                 backSelectedTime = System.currentTimeMillis();
                 Utils.getInstance().makeToast(this, "Press back again to exit");
             }
+        }} catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
     }
 
@@ -360,7 +377,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
+        try{
         String notificationType = getIntent().getStringExtra("notificationType");
         if (notificationType != null) {
             if (notificationType.equals("newsNotification")) {
@@ -376,11 +393,15 @@ public class MainActivity extends AppCompatActivity {
             Log.e(getClass().getSimpleName(), "Extras are null");
         }
         getIntent().removeExtra("notificationType");
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        try{
         String notificationType = getIntent().getStringExtra("notificationType");
         if (notificationType != null) {
             if (notificationType.equals("newsNotification")) {
@@ -396,6 +417,9 @@ public class MainActivity extends AppCompatActivity {
             Log.e(getClass().getSimpleName(), "Extras are null");
         }
         intent.removeExtra("notificationType");
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     @Override

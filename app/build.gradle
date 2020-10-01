@@ -85,6 +85,6 @@ dependencies {
     //play store
     implementation 'com.google.android.play:core:1.8.0'
 
-    // debugImplementation because LeakCanary should only run in debug builds.
+//     debugImplementation because LeakCanary should only run in debug builds.
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.4'
 }

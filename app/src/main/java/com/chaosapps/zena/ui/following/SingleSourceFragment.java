@@ -19,6 +19,7 @@ import com.chaosapps.zena.R;
 import com.chaosapps.zena.adapter.NewsAdapter;
 import com.chaosapps.zena.repository.NewsRepo;
 import com.chaosapps.zena.utils.Controller;
+import com.chaosapps.zena.utils.Utils;
 import com.paginate.Paginate;
 
 public class SingleSourceFragment extends Fragment {
@@ -58,31 +59,43 @@ public class SingleSourceFragment extends Fragment {
     }
 
     private void setUpViews(){
-        actionBarIV.setOnClickListener(v-> Controller.getInstance().singleSourceFragment.setValue(false));
-        fragment_title_textView.setText(NewsRepo.getInstance().selectedSource.getValue());
+        try {
+            actionBarIV.setOnClickListener(v -> Controller.getInstance().singleSourceFragment.setValue(false));
+            fragment_title_textView.setText(NewsRepo.getInstance().selectedSource.getValue());
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpRecyclerView(Bundle savedInstanceState){
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        NewsAdapter newsAdapter = new NewsAdapter(this);
-        NewsRepo.getInstance().newsModelsBySource.observe(getViewLifecycleOwner(), newsAdapter::setNewsList);
-        recyclerView.setAdapter(newsAdapter);
-        if(savedInstanceState != null){
-            recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
-        }
+        try {
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            NewsAdapter newsAdapter = new NewsAdapter(this);
+            NewsRepo.getInstance().newsModelsBySource.observe(getViewLifecycleOwner(), newsAdapter::setNewsList);
+            recyclerView.setAdapter(newsAdapter);
+            if (savedInstanceState != null) {
+                recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
+            }
 
-        Paginate.with(recyclerView, callbacks)
-                .setLoadingTriggerThreshold(0)
-                .addLoadingListItem(true)
-                .build();
+            Paginate.with(recyclerView, callbacks)
+                    .setLoadingTriggerThreshold(0)
+                    .addLoadingListItem(true)
+                    .build();
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void linkWithController() {
-        Controller.getInstance().singleSourceFragment.observe(getViewLifecycleOwner(), aBoolean -> {
-            if (!aBoolean) {
-                getParentFragmentManager().beginTransaction().remove(SingleSourceFragment.this).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-            }
-        });
+        try {
+            Controller.getInstance().singleSourceFragment.observe(getViewLifecycleOwner(), aBoolean -> {
+                if (!aBoolean) {
+                    getParentFragmentManager().beginTransaction().remove(SingleSourceFragment.this).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+                }
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
     private Paginate.Callbacks callbacks = new Paginate.Callbacks() {
         @Override

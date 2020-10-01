@@ -1,5 +1,7 @@
 package com.chaosapps.zena.ui.headlines;
 
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -16,7 +18,7 @@ import static android.view.View.VISIBLE;
 
 public class HeadlinesViewModel extends ViewModel {
 
-    private int skipper = 0;
+    public int skipper = 0;
 
     Map<String, MutableLiveData<List<NewsModel>>> liveDataMap = new HashMap<>();
     Map<String, MutableLiveData<Boolean>> loadingStatesMap = new HashMap<>();
@@ -37,6 +39,8 @@ public class HeadlinesViewModel extends ViewModel {
             }
             trigger.setValue(true);
             initLoadingProgressBar();
+        } else {
+            Log.e("Headlines view model", "Dynamic Variable's categories is empty - - - " + skipper+ " - - - " + dynamicVariables.categories.toString());
         }
     }
 

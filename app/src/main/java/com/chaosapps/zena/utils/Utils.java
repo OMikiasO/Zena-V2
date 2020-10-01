@@ -53,6 +53,7 @@ public class Utils {
     }
 
     public void navSelect(Activity activity, CardView navCardView, int id) {
+        try{
         TextView forYouNavTextView = navCardView.findViewById(R.id.forYouNavTextView);
         TextView headlinesTextView = navCardView.findViewById(R.id.headlinesTextView);
         TextView followingNavTextView = navCardView.findViewById(R.id.followingNavTextView);
@@ -74,10 +75,13 @@ public class Utils {
                 textViews[i].setTextColor(activity.getResources().getColor(R.color.secondary));
             }
 
+        }} catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
     }
 
     public void makeToast(Context context, String message) {
+        try{
         Toast toast = new Toast(context);
         toast.setDuration(Toast.LENGTH_SHORT);
 
@@ -85,15 +89,20 @@ public class Utils {
         View view = inflater.inflate(R.layout.taost_layout, null);
         toast.setView(view);
         ((TextView) view.findViewById(R.id.message)).setText(message);
-        toast.show();
+        toast.show();} catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     public void setImageSource(Context activity, Object imgLink, ImageView imageView) {
+        try{
         Glide.with(activity)
                 .load(imgLink)
                 .transition(withCrossFade(factory))
                 .apply(requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL).timeout(30000).override(600, 350))
-                .into(imageView);
+                .into(imageView);} catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     String getFirstAndLastId(List<FeedElementModel> feedElementModels) {

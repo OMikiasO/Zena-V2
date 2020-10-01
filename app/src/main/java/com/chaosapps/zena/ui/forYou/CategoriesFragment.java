@@ -19,6 +19,7 @@ import com.chaosapps.zena.models.UserModel;
 import com.chaosapps.zena.repository.NewsRepo;
 import com.chaosapps.zena.utils.Account;
 import com.chaosapps.zena.utils.Controller;
+import com.chaosapps.zena.utils.Utils;
 import com.paginate.Paginate;
 
 public class CategoriesFragment extends Fragment {
@@ -51,6 +52,7 @@ public class CategoriesFragment extends Fragment {
     }
 
     private void setUpViews(){
+        try{
         doneBtn.setOnClickListener(v->{
             Controller.getInstance().showCategories.setValue(false);
             UserModel  userModel = Account.getInstance().user.getValue();
@@ -62,9 +64,13 @@ public class CategoriesFragment extends Fragment {
             });
         });
         forYouViewModel.boneBtnEnabled.observe(getViewLifecycleOwner(), doneBtn::setEnabled);
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpRecyclerView() {
+        try{
         categoriesAdapter = new CategoriesAdapter(getActivity());
         categoriesAdapter.setSelectedKeys(Account.getInstance().user.getValue().getSelectedCategories());
         forYouViewModel.categoriesMap.observe(getViewLifecycleOwner(), categoriesAdapter::setCategoryMap);
@@ -76,7 +82,9 @@ public class CategoriesFragment extends Fragment {
                 .setLoadingTriggerThreshold(0)
                 .addLoadingListItem(true)
                 .build();
-
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private Paginate.Callbacks callbacks = new Paginate.Callbacks() {

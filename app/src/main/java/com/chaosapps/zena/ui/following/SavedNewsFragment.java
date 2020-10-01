@@ -19,6 +19,7 @@ import com.chaosapps.zena.R;
 import com.chaosapps.zena.adapter.NewsAdapter;
 import com.chaosapps.zena.repository.NewsRepo;
 import com.chaosapps.zena.utils.Controller;
+import com.chaosapps.zena.utils.Utils;
 
 public class SavedNewsFragment extends Fragment {
     private static final String TAG = "SavedNewsFragment";
@@ -56,26 +57,38 @@ public class SavedNewsFragment extends Fragment {
     }
 
     private void setUpViews(){
-        actionBarIV.setOnClickListener(v-> Controller.getInstance().savedNewsFragment.setValue(false));
-        fragment_title_textView.setText("Saved News");
+        try {
+            actionBarIV.setOnClickListener(v -> Controller.getInstance().savedNewsFragment.setValue(false));
+            fragment_title_textView.setText("Saved News");
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpRecyclerView(Bundle savedInstanceState){
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        NewsAdapter newsAdapter = new NewsAdapter(this);
-        NewsRepo.getInstance().savedNewsModels.observe(getViewLifecycleOwner(), newsAdapter::setNewsList);
-        recyclerView.setAdapter(newsAdapter);
-        if(savedInstanceState != null){
-            recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
+        try {
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            NewsAdapter newsAdapter = new NewsAdapter(this);
+            NewsRepo.getInstance().savedNewsModels.observe(getViewLifecycleOwner(), newsAdapter::setNewsList);
+            recyclerView.setAdapter(newsAdapter);
+            if (savedInstanceState != null) {
+                recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
+            }
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
     }
 
     private void linkWithController() {
-        Controller.getInstance().savedNewsFragment.observe(getViewLifecycleOwner(), aBoolean -> {
-            if (!aBoolean) {
-                getParentFragmentManager().beginTransaction().remove(SavedNewsFragment.this).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-            }
-        });
+        try {
+            Controller.getInstance().savedNewsFragment.observe(getViewLifecycleOwner(), aBoolean -> {
+                if (!aBoolean) {
+                    getParentFragmentManager().beginTransaction().remove(SavedNewsFragment.this).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+                }
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
 }

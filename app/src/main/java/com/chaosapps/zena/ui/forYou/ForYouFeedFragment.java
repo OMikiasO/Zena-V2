@@ -16,6 +16,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.chaosapps.zena.adapter.NewsAdapter;
 import com.chaosapps.zena.repository.NewsRepo;
+import com.chaosapps.zena.utils.Utils;
 import com.paginate.Paginate;
 
 public class ForYouFeedFragment extends Fragment {
@@ -47,6 +48,7 @@ public class ForYouFeedFragment extends Fragment {
     }
 
     private void setUpRecyclerView(Bundle savedInstanceState){
+        try{
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         NewsAdapter newsAdapter = new NewsAdapter(this);
         NewsRepo.getInstance().mainFeedNewsList.observe(getViewLifecycleOwner(), newsAdapter::setMainFeed);
@@ -62,7 +64,9 @@ public class ForYouFeedFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             NewsRepo.getInstance().fetchNewsForMainFeed(getContext(), false);
             swipeRefreshLayout.setRefreshing(false);
-        });
+        }); } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
 

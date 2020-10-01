@@ -19,6 +19,7 @@ import com.chaosapps.zena.App;
 import com.chaosapps.zena.R;
 import com.chaosapps.zena.adapter.SourceAdapter;
 import com.chaosapps.zena.utils.Controller;
+import com.chaosapps.zena.utils.Utils;
 
 public class SourcesFragment extends Fragment {
     private static final String TAG = "SourcesListFragment";
@@ -56,26 +57,38 @@ public class SourcesFragment extends Fragment {
     }
 
     private void setUpViews(){
-        actionBarIV.setOnClickListener(v-> Controller.getInstance().sourcesFragment.setValue(false));
-        fragment_title_textView.setText("Sources");
+        try {
+            actionBarIV.setOnClickListener(v -> Controller.getInstance().sourcesFragment.setValue(false));
+            fragment_title_textView.setText("Sources");
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpRecyclerView(Bundle savedInstanceState){
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        SourceAdapter sourceAdapter = new SourceAdapter(this);
-        App.dynamicVariables.observe(getViewLifecycleOwner(), dynamicVariables -> sourceAdapter.setSourcesMap(dynamicVariables.sourceLogos));
-        recyclerView.setAdapter(sourceAdapter);
-        if(savedInstanceState != null){
-            recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
+        try {
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            SourceAdapter sourceAdapter = new SourceAdapter(this);
+            App.dynamicVariables.observe(getViewLifecycleOwner(), dynamicVariables -> sourceAdapter.setSourcesMap(dynamicVariables.sourceLogos));
+            recyclerView.setAdapter(sourceAdapter);
+            if (savedInstanceState != null) {
+                recyclerView.scrollToPosition(savedInstanceState.getInt("position"));
+            }
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
     }
 
     private void linkWithController() {
-        Controller.getInstance().sourcesFragment.observe(getViewLifecycleOwner(), aBoolean -> {
-            if (!aBoolean) {
-                getParentFragmentManager().beginTransaction().remove(SourcesFragment.this).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
-            }
-        });
+        try {
+            Controller.getInstance().sourcesFragment.observe(getViewLifecycleOwner(), aBoolean -> {
+                if (!aBoolean) {
+                    getParentFragmentManager().beginTransaction().remove(SourcesFragment.this).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE).commit();
+                }
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
 }

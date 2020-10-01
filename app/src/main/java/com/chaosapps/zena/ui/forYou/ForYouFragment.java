@@ -60,6 +60,7 @@ public class ForYouFragment extends Fragment {
     }
 
     private void synchronizer() {
+        try{
         App.dynamicVariables.observe(getViewLifecycleOwner(),dynamicVariables -> {
             forYouViewModel.categoriesMap.setValue(dynamicVariables.categories);
         });
@@ -69,10 +70,13 @@ public class ForYouFragment extends Fragment {
         NewsRepo.getInstance().loadingMainFeed.observe(getViewLifecycleOwner(),aBoolean -> {
             if (aBoolean) forYouViewModel.loadingProgressBarVisibility.postValue(View.VISIBLE);
             else forYouViewModel.loadingProgressBarVisibility.postValue(View.GONE);
-        });
+        }); } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpViews() {
+        try{
         feedSettingsImageView.setOnClickListener(v-> Controller.getInstance().showCategories.setValue(true));
         Controller.getInstance().showCategories.observe(getViewLifecycleOwner(), aBoolean -> {
             if(aBoolean){
@@ -90,9 +94,13 @@ public class ForYouFragment extends Fragment {
         });
         forYouViewModel.loadingProgressBarVisibility.observe(getViewLifecycleOwner(), loadingFeedProgressBar::setVisibility);
         searchImageView.setOnClickListener(v -> Controller.getInstance().searchFragment.setValue(true));
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpSwitcher() {
+        try{
         forYouViewModel.visibleFragment.observe(getViewLifecycleOwner(), integer -> {
             if (integer == ForYouViewModel.SHOW_NON) {
                 fm.beginTransaction().hide(categoriesFragment);
@@ -104,11 +112,14 @@ public class ForYouFragment extends Fragment {
                 fm.beginTransaction().hide(active).show(forYouFeedFragment).commit();
                 active = forYouFeedFragment;
             }
-        });
+        }); } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
 
     private void setUpFragments(Bundle savedInstanceState) {
+        try{
         fm = getChildFragmentManager();
         forYouFeedFragment = (ForYouFeedFragment) fm.findFragmentByTag("1");
         if (forYouFeedFragment == null) {
@@ -128,6 +139,8 @@ public class ForYouFragment extends Fragment {
             if (active == null) active = forYouFeedFragment;
         } else {
             active = forYouFeedFragment;
+        } } catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
     }
 

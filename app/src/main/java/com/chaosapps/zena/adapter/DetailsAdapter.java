@@ -170,7 +170,7 @@ public class DetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         int viewType = getItemViewType(position);
         switch (viewType) {
             case RELATED_NEWS:
-                ((NewsAdapter.SmallNewsItemHolder) holder).bind(fragment.getContext(), NewsRepo.getInstance().relatedNewsList.getValue().get(Integer.parseInt(newsBodyItems.get(position))));
+                ((NewsAdapter.SmallNewsItemHolder) holder).bind(fragment.getActivity(), NewsRepo.getInstance().relatedNewsList.getValue().get(Integer.parseInt(newsBodyItems.get(position))));
                 break;
             case IMAGE:
                 ((ImageItemHolder) holder).bind(fragment.getContext(), newsBodyItems.get(position));

@@ -1,6 +1,6 @@
 package com.chaosapps.zena.adapter;
 
-import android.content.Context;
+import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +18,7 @@ import com.chaosapps.zena.R;
 import com.chaosapps.zena.models.FeedElementModel;
 import com.chaosapps.zena.models.NewsModel;
 import com.chaosapps.zena.repository.NewsRepo;
+import com.chaosapps.zena.utils.AdminUtils;
 import com.chaosapps.zena.utils.CacheUtils;
 import com.chaosapps.zena.utils.Controller;
 import com.chaosapps.zena.utils.Utils;
@@ -101,11 +102,11 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
                 break;
             case SMALL_NEWS_ELEMENT:
-                ((SmallNewsItemHolder) holder).bind(fragment.getContext(), (NewsModel) mainFeed.get(position));
+                ((SmallNewsItemHolder) holder).bind(fragment.getActivity(), (NewsModel) mainFeed.get(position));
                 break;
             case BIG_NEWS_ELEMENT:
             default:
-                ((NewsItemHolder) holder).bind(fragment.getContext(), (NewsModel) mainFeed.get(position));
+                ((NewsItemHolder) holder).bind(fragment.getActivity(), (NewsModel) mainFeed.get(position));
                 break;
         }
 
@@ -139,12 +140,12 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             menuImageView = itemView.findViewById(R.id.menuImageView);
         }
 
-        void bind(Context context, NewsModel newsModel) {
+        void bind(Activity activity, NewsModel newsModel) {
             List<String> savedNewsIds = CacheUtils.getInstance().savedNewsIds.getValue();
             Map<String, String> sourceLogos = App.dynamicVariables.getValue().sourceLogos;
             titleTextView.setText(newsModel.getTitle());
-            Utils.getInstance().setImageSource(context, newsModel.getThumbnailLink(), thumbnailImageView);
-            rankingTextView.setText(Utils.getInstance().timeFormatter(newsModel.getPostedTime(), context));
+            Utils.getInstance().setImageSource(activity, newsModel.getThumbnailLink(), thumbnailImageView);
+            rankingTextView.setText(Utils.getInstance().timeFormatter(newsModel.getPostedTime(), activity));
             postedTimeTextView.setText(newsModel.getCategory());
 
             if (newsModel.getNumber() != -1) {
@@ -155,7 +156,7 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             sourceTextView.setText(newsModel.getSource());
             if (newsModel.isShowSourceText()) sourceTextView.setVisibility(View.VISIBLE);
             else sourceTextView.setVisibility(View.GONE);
-            Utils.getInstance().setImageSource(context, sourceLogos.get(newsModel.getSource()), sourceImageView);
+            Utils.getInstance().setImageSource(activity, sourceLogos.get(newsModel.getSource()), sourceImageView);
 
             menuImageView.setOnClickListener(v -> itemView.showContextMenu());
 
@@ -175,19 +176,24 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 } else {
                     menu.add(0, v.getId(), 0, "Save")
                             .setOnMenuItemClickListener(item -> {
-                                CacheUtils.getInstance().saveNewsId(context.getApplicationContext(), newsModel.getId(), Source.DEFAULT);
+                                CacheUtils.getInstance().saveNewsId(activity, newsModel.getId(), Source.DEFAULT);
                                 return true;
                             });
                 }
 
                 menu.add(0, v.getId(), 0, "Share")
                         .setOnMenuItemClickListener(item -> {
-                            Utils.getInstance().share(context, newsModel.getLink());
+                            Utils.getInstance().share(activity, newsModel.getLink());
                             return true;
                         });
                 menu.add(0, v.getId(), 0, "Visit website")
                         .setOnMenuItemClickListener(item -> {
-                            Utils.getInstance().openLink(context, newsModel.getLink());
+                            Utils.getInstance().openLink(activity, newsModel.getLink());
+                            return true;
+                        });
+                menu.add(0, v.getId(), 0, "Send notification")
+                        .setOnMenuItemClickListener(item -> {
+                            AdminUtils.getInstance().sendNotification(activity, newsModel);
                             return true;
                         });
             });
@@ -219,17 +225,17 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             menuImageView = itemView.findViewById(R.id.menuImageView);
         }
 
-        void bind(Context context, NewsModel newsModel) {
+        void bind(Activity activity, NewsModel newsModel) {
             List<String> savedNewsIds = CacheUtils.getInstance().savedNewsIds.getValue();
             Map<String, String> sourceLogos = App.dynamicVariables.getValue().sourceLogos;
             titleTextView.setText(newsModel.getTitle());
             if (newsModel.getThumbnailLink() != null) {
                 photoCardView.setVisibility(View.VISIBLE);
-                Utils.getInstance().setImageSource(context, newsModel.getThumbnailLink(), thumbnailImageView);
+                Utils.getInstance().setImageSource(activity, newsModel.getThumbnailLink(), thumbnailImageView);
             } else {
                 photoCardView.setVisibility(View.GONE);
             }
-            rankingTextView.setText(Utils.getInstance().timeFormatter(newsModel.getPostedTime(), context));
+            rankingTextView.setText(Utils.getInstance().timeFormatter(newsModel.getPostedTime(), activity));
             postedTimeTextView.setText(newsModel.getCategory());
 
             if (newsModel.getNumber() != -1) {
@@ -240,7 +246,7 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             sourceTextView.setText(newsModel.getSource());
             if (newsModel.isShowSourceText()) sourceTextView.setVisibility(View.VISIBLE);
             else sourceTextView.setVisibility(View.GONE);
-            Utils.getInstance().setImageSource(context, sourceLogos.get(newsModel.getSource()), sourceImageView);
+            Utils.getInstance().setImageSource(activity, sourceLogos.get(newsModel.getSource()), sourceImageView);
 
             itemView.setOnClickListener(v -> {
                 NewsRepo.getInstance().selectedNewsId.setValue(newsModel.getId());
@@ -261,19 +267,24 @@ public class NewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 } else {
                     menu.add(0, v.getId(), 0, "Save")
                             .setOnMenuItemClickListener(item -> {
-                                CacheUtils.getInstance().saveNewsId(context, newsModel.getId(), Source.DEFAULT);
+                                CacheUtils.getInstance().saveNewsId(activity, newsModel.getId(), Source.DEFAULT);
                                 return true;
                             });
                 }
 
                 menu.add(0, v.getId(), 0, "Share")
                         .setOnMenuItemClickListener(item -> {
-                            Utils.getInstance().share(context, newsModel.getLink());
+                            Utils.getInstance().share(activity, newsModel.getLink());
                             return true;
                         });
                 menu.add(0, v.getId(), 0, "Visit website")
                         .setOnMenuItemClickListener(item -> {
-                            Utils.getInstance().openLink(context, newsModel.getLink());
+                            Utils.getInstance().openLink(activity, newsModel.getLink());
+                            return true;
+                        });
+                menu.add(0, v.getId(), 0, "Send notification")
+                        .setOnMenuItemClickListener(item -> {
+                            AdminUtils.getInstance().sendNotification(activity, newsModel);
                             return true;
                         });
             });

@@ -22,6 +22,7 @@ import com.chaosapps.zena.adapter.NewsAdapter;
 import com.chaosapps.zena.adapter.SourceAdapter;
 import com.chaosapps.zena.repository.NewsRepo;
 import com.chaosapps.zena.utils.Controller;
+import com.chaosapps.zena.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,47 +68,55 @@ public class FollowingFragment extends Fragment {
     }
 
     private void setUpSavedNewsViews() {
-        savedNewsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        NewsAdapter newsAdapter = new NewsAdapter(this);
-        NewsRepo.getInstance().savedNewsModels.observe(getViewLifecycleOwner(), newsModelList -> {
-            Collections.reverse(newsModelList);
-            if (newsModelList.isEmpty()) {
-                noSavedNewsImageView.setVisibility(View.VISIBLE);
-                noSavedNewsTextView.setVisibility(View.VISIBLE);
-                savedNewsRecyclerView.setVisibility(View.GONE);
-            } else {
-                noSavedNewsImageView.setVisibility(View.GONE);
-                noSavedNewsTextView.setVisibility(View.GONE);
-                savedNewsRecyclerView.setVisibility(View.VISIBLE);
-            }
-            if (newsModelList.size() > 2) {
-                seeAllSavedTextView.setVisibility(View.VISIBLE);
-                newsModelList = newsModelList.subList(0, 2);
-            } else seeAllSavedTextView.setVisibility(View.GONE);
-            newsAdapter.setNewsList(newsModelList);
-        });
-        savedNewsRecyclerView.setAdapter(newsAdapter);
-        seeAllSavedTextView.setOnClickListener(v -> Controller.getInstance().savedNewsFragment.setValue(true));
+        try {
+            savedNewsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            NewsAdapter newsAdapter = new NewsAdapter(this);
+            NewsRepo.getInstance().savedNewsModels.observe(getViewLifecycleOwner(), newsModelList -> {
+                Collections.reverse(newsModelList);
+                if (newsModelList.isEmpty()) {
+                    noSavedNewsImageView.setVisibility(View.VISIBLE);
+                    noSavedNewsTextView.setVisibility(View.VISIBLE);
+                    savedNewsRecyclerView.setVisibility(View.GONE);
+                } else {
+                    noSavedNewsImageView.setVisibility(View.GONE);
+                    noSavedNewsTextView.setVisibility(View.GONE);
+                    savedNewsRecyclerView.setVisibility(View.VISIBLE);
+                }
+                if (newsModelList.size() > 2) {
+                    seeAllSavedTextView.setVisibility(View.VISIBLE);
+                    newsModelList = newsModelList.subList(0, 2);
+                } else seeAllSavedTextView.setVisibility(View.GONE);
+                newsAdapter.setNewsList(newsModelList);
+            });
+            savedNewsRecyclerView.setAdapter(newsAdapter);
+            seeAllSavedTextView.setOnClickListener(v -> Controller.getInstance().savedNewsFragment.setValue(true));
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setUpSourcesViews() {
-        sourcesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        SourceAdapter sourceAdapter = new SourceAdapter(this);
-        App.dynamicVariables.observe(getViewLifecycleOwner(), dynamicVariables -> {
-            Map<String, String> sourcesMap = new HashMap<>();
-            for (int i = 0; i < 3; i++) {
-                try {
-                    String key = new ArrayList<>(dynamicVariables.sourceLogos.keySet()).get(i);
-                    String value = dynamicVariables.sourceLogos.get(key);
-                    sourcesMap.put(key, value);
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage());
-                    break;
+        try {
+            sourcesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            SourceAdapter sourceAdapter = new SourceAdapter(this);
+            App.dynamicVariables.observe(getViewLifecycleOwner(), dynamicVariables -> {
+                Map<String, String> sourcesMap = new HashMap<>();
+                for (int i = 0; i < 3; i++) {
+                    try {
+                        String key = new ArrayList<>(dynamicVariables.sourceLogos.keySet()).get(i);
+                        String value = dynamicVariables.sourceLogos.get(key);
+                        sourcesMap.put(key, value);
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getMessage());
+                        break;
+                    }
                 }
-            }
-            sourceAdapter.setSourcesMap(sourcesMap);
-        });
-        sourcesRecyclerView.setAdapter(sourceAdapter);
-        seeAllSourcesTextView.setOnClickListener(v -> Controller.getInstance().sourcesFragment.setValue(true));
+                sourceAdapter.setSourcesMap(sourcesMap);
+            });
+            sourcesRecyclerView.setAdapter(sourceAdapter);
+            seeAllSourcesTextView.setOnClickListener(v -> Controller.getInstance().sourcesFragment.setValue(true));
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 }

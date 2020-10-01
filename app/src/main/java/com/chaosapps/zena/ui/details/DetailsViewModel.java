@@ -10,6 +10,7 @@ import com.chaosapps.zena.R;
 import com.chaosapps.zena.models.NewsDetailsModel;
 import com.chaosapps.zena.repository.NewsRepo;
 import com.chaosapps.zena.utils.CacheUtils;
+import com.chaosapps.zena.utils.Utils;
 import com.google.firebase.firestore.Source;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class DetailsViewModel extends ViewModel {
     });
 
     public void updateViewItems(Context context) {
+        try{
         //required views
         boolean loadingNews = NewsRepo.getInstance().loadingNews.getValue();
         boolean failedToFetch = NewsRepo.getInstance().failedToFetch.getValue();
@@ -43,10 +45,13 @@ public class DetailsViewModel extends ViewModel {
         else errorStateVisibility.setValue(GONE);
 
         setSaveBtnAttribs(context, savedNewsIds, newsDetailsModel);
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 
     private void setSaveBtnAttribs(Context context, List<String> savedNewsIds, NewsDetailsModel newsDetailsModel) {
-
+        try{
         for (String savedNewsId : savedNewsIds) {
             if (savedNewsId.equals(newsDetailsModel.getId())) {
                 saveImageSourceId.setValue(R.drawable.unsave);
@@ -55,8 +60,11 @@ public class DetailsViewModel extends ViewModel {
                 return;
             }
         }
-        onSaveClickListener.setValue(v -> CacheUtils.getInstance().saveNewsId(context.getApplicationContext(), newsDetailsModel.getId(), Source.CACHE));
+        onSaveClickListener.setValue(v -> CacheUtils.getInstance().saveNewsId(context, newsDetailsModel.getId(), Source.CACHE));
         saveImageSourceId.setValue(R.drawable.save);
         saveImageColor.setValue(R.color.secondary);
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
+        }
     }
 }

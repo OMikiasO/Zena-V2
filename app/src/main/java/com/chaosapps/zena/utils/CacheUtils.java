@@ -8,7 +8,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Source;
-import com.chaosapps.zena.models.FeedElementModel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,27 +31,6 @@ public class CacheUtils {
         return INSTANCE;
     }
 
-    public String getSavedFirstAndLastIds(String feedId) {
-        String firstAndLastIds = null;
-        try {
-            firstAndLastIds = userSharedPref.getString("firstAndLastIds" + feedId, null);
-            Log.e(TAG, firstAndLastIds + " - get" + feedId);
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-        return firstAndLastIds;
-    }
-
-    public void saveFirstAndLastIds(List<FeedElementModel> feedElementModels, String feedId) {
-        String firstAndLastIds = Utils.getInstance().getFirstAndLastId(feedElementModels);
-        try {
-            userSharedPref.edit().putString("firstAndLastIds" + feedId, firstAndLastIds).apply();
-            Log.e(TAG, firstAndLastIds + " - save" + feedId);
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-    }
-
     /////////////////////////////////SAVED NEWS ID CACHE FUNCTIONS//////////////////////////////////
 
     public List<String> getSavedNewsIds() {
@@ -68,28 +46,31 @@ public class CacheUtils {
     }
 
     public void saveNewsId(Context context, String newsId, Source source) {
-        if (newsId == null) {
-            Utils.getInstance().makeToast(context, "News hasn't loaded yet");
-            return;
+        try {
+            if (newsId == null) {
+                Utils.getInstance().makeToast(context, "News hasn't loaded yet");
+                return;
+            }
+            FirebaseFirestore.getInstance().document("NewsDetails/" + newsId)
+                    .get(source).addOnCompleteListener(task -> {
+                if (task.isSuccessful())
+                    try {
+                        List<String> savedNewsIds = getSavedNewsIds();
+                        Utils.getInstance().makeToast(context, "Saved");
+                        if (savedNewsIds.contains(newsId)) return;
+                        savedNewsIds.add(newsId);
+                        this.savedNewsIds.setValue(savedNewsIds); // post it the new value to the live data too
+                        userSharedPref.edit().putStringSet("savedNewsIds", new HashSet<>(savedNewsIds)).apply();
+                        Log.e(TAG, savedNewsIds + " - saveNewsId");
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                else
+                    Utils.getInstance().makeToast(context, "Unable to save the News");
+            });
+        } catch (Exception e) {
+            Utils.getInstance().recordException(e);
         }
-        FirebaseFirestore.getInstance().document("NewsDetails/" + newsId)
-                .get(source).addOnCompleteListener(task -> {
-            if (task.isSuccessful())
-                try {
-                    List<String> savedNewsIds = getSavedNewsIds();
-                    Utils.getInstance().makeToast(context, "Saved");
-                    if (savedNewsIds.contains(newsId)) return;
-                    savedNewsIds.add(newsId);
-                    this.savedNewsIds.setValue(savedNewsIds); // post it the new value to the live data too
-                    userSharedPref.edit().putStringSet("savedNewsIds", new HashSet<>(savedNewsIds)).apply();
-                    Log.e(TAG, savedNewsIds + " - saveNewsId");
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            else
-                Utils.getInstance().makeToast(context, "Unable to save the News");
-        });
-
     }
 
     public void unSaveNewsId(String newsId) {

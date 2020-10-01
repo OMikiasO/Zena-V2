@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 
@@ -11,6 +12,10 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.messaging.RemoteMessage;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import static com.chaosapps.zena.App.CHANNEL_1_ID;
 
@@ -33,7 +38,11 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         if (remoteMessage.getNotification() != null) {
             String title = remoteMessage.getNotification().getTitle();
             String message = remoteMessage.getNotification().getBody();
-            sendNotification(title, message, remoteMessage.toIntent());
+            if (remoteMessage.getNotification().getImageUrl() != null) {
+                String image = remoteMessage.getNotification().getImageUrl().toString();
+                bitmap = getBitmapFromUrl(image);
+            }//get message
+            sendNotification(title, message, bitmap, remoteMessage.toIntent());
         }
     }
 
@@ -44,11 +53,9 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     }
 
 
-    private void sendNotification(String title, String messageBody, Intent intent) {
+    private void sendNotification(String title, String messageBody, Bitmap image, Intent intent) {
 
 //        Intent intent;
-//
-        String orderId = intent.getStringExtra("orderId");
         intent.setClass(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -58,18 +65,35 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_1_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("bro bo")
+                .setContentTitle(title)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
-                .addAction(new NotificationCompat.Action(R.mipmap.ic_launcher, "Details", pendingIntent))
                 .setSound(defaultSoundUri)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_STATUS)
+                .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(image))
                 .setContentIntent(pendingIntent)
                 .build();
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(5, notification);
-//        notificationManager.notify(Integer.parseInt(orderId.substring(orderId.length()-3)) /* ID of notification */, notification);
+    }
+
+    public Bitmap getBitmapFromUrl(String imageUrl) {
+        try {
+            URL url = new URL(imageUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap bitmap = BitmapFactory.decodeStream(input);
+            return bitmap;
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+
+        }
     }
 }
